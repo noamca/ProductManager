@@ -1,0 +1,173 @@
+Line 649:
+Brand select details:
+{
+  "id": "brand",
+  "name": "brand",
+  "selected_value": "0",
+  "selected_text": "�",
+  "options": [
+    {
+      "value": "0",
+      "text": "�"
+    },
+    {
+      "value": "73",
+      "text": "!Be Quiet"
+    },
+    {
+      "value": "175",
+      "text": "1STPLAYER"
+    },
+    {
+      "value": "93",
+      "text": "2K Games"
+    },
+    {
+      "value": "14",
+      "text": "Acer"
+    },
+    {
+      "value": "90",
+      "text": "Activision | Blizzard"
+    },
+    {
+      "value": "74",
+      "text": "ADATA"
+    },
+    {
+      "value": "144",
+      "text": "ADVICE"
+    },
+    {
+      "value": "49",
+      "text": "AMD"
+    },
+    {
+      "value": "54",
+      "text": "ANTEC"
+    },
+    {
+      "value": "20",
+      "text": "Aoc"
+    },
+    {
+      "value": "53",
+      "text": "AORUS"
+    },
+    {
+      "value": "35",
+      "text": "Apple"
+    },
+    {
+      "value": "131",
+      "text": "ARUBA"
+    },
+    {
+      "value": "141",
+      "text": "ASrock"
+    },
+    {
+      "value": "32",
+      "text": "Asus"
+    },
+    {
+      "value": "81",
+      "text": "ATEN"
+    },
+    {
+      "value": "102",
+      "text": "Avantree"
+    },
+    {
+      "value": "134",
+      "text": "BANDAI"
+    },
+    {
+      "value": "79",
+      "text": "BASEUS"
+    },
+    {
+      "value": "108",
+      "text": "Belkin"
+    },
+    {
+      "value": "155",
+      "text": "Beyerdynamic"
+    },
+    {
+      "value": "60",
+      "text": "Blackview"
+    },
+    {
+      "value": "139",
+      "text": "Blaupunkt"
+    },
+    {
+      "value": "70",
+      "text": "BOON"
+    },
+    {
+      "value": "138",
+      "text": "BOSE"
+    },
+    {
+      "value": "99",
+      "text": "Brother"
+    },
+    {
+      "value": "59",
+      "text": "Canon"
+    },
+    {
+      "value": "94",
+      "text": "CHUWI"
+    },
+    {
+      "value": "136",
+      "text": "CISCO"
+    }
+  ]
+}
+
+delivery_th select details:
+{
+  "id": "delivery_th",
+  "name": "delivery_th",
+  "selected_value": "0",
+  "selected_text": "7 � � � � - 0 �",
+  "options": [
+    {
+      "value": "-1",
+      "text": "� � �"
+    },
+    {
+      "value": "0",
+      "text": "7 � � � � - 0 �"
+    },
+    {
+      "value": "1",
+      "text": "5 � � � � UPS - 9 �"
+    },
+    {
+      "value": "2",
+      "text": "� 4 � � � � UPS - 29 �"
+    },
+    {
+      "value": "3",
+      "text": "� � � � 7 � � � � - 65 �"
+    },
+    {
+      "value": "4",
+      "text": "� � � � - 0 �"
+    }
+  ]
+}
+
+Param selects:
+Param 1 (label=''):
+  Selected: '' (value='')
+  First 5 options: [{'value': '', 'text': ''}, {'value': '3 � � �"� � �', 'text': '3 � � �"� � �'}, {'value': '12 � � �"� � �', 'text': '12 � � �"� � �'}, {'value': '12 � � �"� � � �', 'text': '12 � � �"� � � �'}, {'value': '12 � � �"� � �', 'text': '12 � � �"� � �'}]
+Param 2 (label=''):
+  Selected: '' (value='')
+  First 5 options: [{'value': '', 
+================================================================================

@@ -1,0 +1,702 @@
+[
+  {
+    "value": "0",
+    "text": "בחר"
+  },
+  {
+    "value": "73",
+    "text": "!Be Quiet"
+  },
+  {
+    "value": "175",
+    "text": "1STPLAYER"
+  },
+  {
+    "value": "93",
+    "text": "2K Games"
+  },
+  {
+    "value": "14",
+    "text": "Acer"
+  },
+  {
+    "value": "90",
+    "text": "Activision | Blizzard"
+  },
+  {
+    "value": "74",
+    "text": "ADATA"
+  },
+  {
+    "value": "144",
+    "text": "ADVICE"
+  },
+  {
+    "value": "49",
+    "text": "AMD"
+  },
+  {
+    "value": "54",
+    "text": "ANTEC"
+  },
+  {
+    "value": "20",
+    "text": "Aoc"
+  },
+  {
+    "value": "53",
+    "text": "AORUS"
+  },
+  {
+    "value": "35",
+    "text": "Apple"
+  },
+  {
+    "value": "131",
+    "text": "ARUBA"
+  },
+  {
+    "value": "141",
+    "text": "ASrock"
+  },
+  {
+    "value": "32",
+    "text": "Asus"
+  },
+  {
+    "value": "81",
+    "text": "ATEN"
+  },
+  {
+    "value": "102",
+    "text": "Avantree"
+  },
+  {
+    "value": "134",
+    "text": "BANDAI"
+  },
+  {
+    "value": "79",
+    "text": "BASEUS"
+  },
+  {
+    "value": "108",
+    "text": "Belkin"
+  },
+  {
+    "value": "155",
+    "text": "Beyerdynamic"
+  },
+  {
+    "value": "60",
+    "text": "Blackview"
+  },
+  {
+    "value": "139",
+    "text": "Blaupunkt"
+  },
+  {
+    "value": "70",
+    "text": "BOON"
+  },
+  {
+    "value": "138",
+    "text": "BOSE"
+  },
+  {
+    "value": "99",
+    "text": "Brother"
+  },
+  {
+    "value": "59",
+    "text": "Canon"
+  },
+  {
+    "value": "94",
+    "text": "CHUWI"
+  },
+  {
+    "value": "136",
+    "text": "CISCO"
+  },
+  {
+    "value": "153",
+    "text": "Contour"
+  },
+  {
+    "value": "159",
+    "text": "Cool Moon"
+  },
+  {
+    "value": "55",
+    "text": "Cooler Master"
+  },
+  {
+    "value": "25",
+    "text": "Corsair"
+  },
+  {
+    "value": "42",
+    "text": "Cougar"
+  },
+  {
+    "value": "76",
+    "text": "Creative"
+  },
+  {
+    "value": "52",
+    "text": "CRUCIAL"
+  },
+  {
+    "value": "130",
+    "text": "Cudy"
+  },
+  {
+    "value": "58",
+    "text": "D-Link"
+  },
+  {
+    "value": "114",
+    "text": "Deep Cool"
+  },
+  {
+    "value": "33",
+    "text": "Dell"
+  },
+  {
+    "value": "61",
+    "text": "DOOGEE"
+  },
+  {
+    "value": "34",
+    "text": "DRAGON"
+  },
+  {
+    "value": "85",
+    "text": "EA Games"
+  },
+  {
+    "value": "110",
+    "text": "Edifier"
+  },
+  {
+    "value": "56",
+    "text": "Elgato"
+  },
+  {
+    "value": "162",
+    "text": "ENERGY"
+  },
+  {
+    "value": "164",
+    "text": "Epson"
+  },
+  {
+    "value": "150",
+    "text": "ERGO"
+  },
+  {
+    "value": "174",
+    "text": "EVOLUENT"
+  },
+  {
+    "value": "145",
+    "text": "EZcool"
+  },
+  {
+    "value": "28",
+    "text": "Fifine"
+  },
+  {
+    "value": "118",
+    "text": "FireCuda"
+  },
+  {
+    "value": "120",
+    "text": "FSP"
+  },
+  {
+    "value": "45",
+    "text": "Funko Pop"
+  },
+  {
+    "value": "51",
+    "text": "G.SKILL"
+  },
+  {
+    "value": "173",
+    "text": "GAINWARD"
+  },
+  {
+    "value": "161",
+    "text": "galax"
+  },
+  {
+    "value": "65",
+    "text": "GAMDIAS"
+  },
+  {
+    "value": "137",
+    "text": "GEIL"
+  },
+  {
+    "value": "87",
+    "text": "Genius"
+  },
+  {
+    "value": "46",
+    "text": "GIGABYTE"
+  },
+  {
+    "value": "126",
+    "text": "Glorius"
+  },
+  {
+    "value": "160",
+    "text": "GMKtec"
+  },
+  {
+    "value": "100",
+    "text": "Gold Touch"
+  },
+  {
+    "value": "177",
+    "text": "GRAVASTAR"
+  },
+  {
+    "value": "67",
+    "text": "Grip Case"
+  },
+  {
+    "value": "165",
+    "text": "HK GAMING"
+  },
+  {
+    "value": "69",
+    "text": "HONOR"
+  },
+  {
+    "value": "64",
+    "text": "HP"
+  },
+  {
+    "value": "44",
+    "text": "HUAWEI"
+  },
+  {
+    "value": "24",
+    "text": "HUION"
+  },
+  {
+    "value": "38",
+    "text": "HyperX"
+  },
+  {
+    "value": "48",
+    "text": "Intel"
+  },
+  {
+    "value": "41",
+    "text": "JABRA"
+  },
+  {
+    "value": "40",
+    "text": "JBL"
+  },
+  {
+    "value": "124",
+    "text": "Jlab"
+  },
+  {
+    "value": "152",
+    "text": "Kinesis"
+  },
+  {
+    "value": "112",
+    "text": "King Games"
+  },
+  {
+    "value": "50",
+    "text": "Kingston"
+  },
+  {
+    "value": "127",
+    "text": "KIOXIA"
+  },
+  {
+    "value": "113",
+    "text": "Leadtek"
+  },
+  {
+    "value": "146",
+    "text": "LEDSUNE"
+  },
+  {
+    "value": "22",
+    "text": "Lenovo"
+  },
+  {
+    "value": "176",
+    "text": "LEXAR"
+  },
+  {
+    "value": "63",
+    "text": "LG"
+  },
+  {
+    "value": "133",
+    "text": "LIAN LI"
+  },
+  {
+    "value": "18",
+    "text": "Logitech"
+  },
+  {
+    "value": "23",
+    "text": "LUMI"
+  },
+  {
+    "value": "43",
+    "text": "MAG"
+  },
+  {
+    "value": "128",
+    "text": "MAIRDI"
+  },
+  {
+    "value": "115",
+    "text": "MAIWO"
+  },
+  {
+    "value": "47",
+    "text": "Marvo"
+  },
+  {
+    "value": "168",
+    "text": "Matias"
+  },
+  {
+    "value": "179",
+    "text": "MECOOL"
+  },
+  {
+    "value": "72",
+    "text": "Mercusys"
+  },
+  {
+    "value": "170",
+    "text": "Meta"
+  },
+  {
+    "value": "36",
+    "text": "Microsoft"
+  },
+  {
+    "value": "31",
+    "text": "Miracase"
+  },
+  {
+    "value": "123",
+    "text": "Motorola"
+  },
+  {
+    "value": "15",
+    "text": "Msi"
+  },
+  {
+    "value": "104",
+    "text": "Netac"
+  },
+  {
+    "value": "78",
+    "text": "Next Level Racing"
+  },
+  {
+    "value": "7",
+    "text": "Nintendo"
+  },
+  {
+    "value": "68",
+    "text": "NOCTUA"
+  },
+  {
+    "value": "9",
+    "text": "Nvidia"
+  },
+  {
+    "value": "8",
+    "text": "Oculus"
+  },
+  {
+    "value": "147",
+    "text": "OLAX"
+  },
+  {
+    "value": "149",
+    "text": "ONIKUMA"
+  },
+  {
+    "value": "180",
+    "text": "OUKITEL"
+  },
+  {
+    "value": "181",
+    "text": "PALEDN"
+  },
+  {
+    "value": "167",
+    "text": "Patriot"
+  },
+  {
+    "value": "97",
+    "text": "Phanteks"
+  },
+  {
+    "value": "19",
+    "text": "PHILIPS"
+  },
+  {
+    "value": "103",
+    "text": "PNY"
+  },
+  {
+    "value": "39",
+    "text": "Pokemon"
+  },
+  {
+    "value": "151",
+    "text": "POP!"
+  },
+  {
+    "value": "154",
+    "text": "Posturite"
+  },
+  {
+    "value": "66",
+    "text": "Pouchino"
+  },
+  {
+    "value": "125",
+    "text": "PowerA"
+  },
+  {
+    "value": "171",
+    "text": "ProtoArc"
+  },
+  {
+    "value": "116",
+    "text": "QNAP"
+  },
+  {
+    "value": "21",
+    "text": "razer"
+  },
+  {
+    "value": "77",
+    "text": "ROCCAT"
+  },
+  {
+    "value": "88",
+    "text": "Rockstar Games"
+  },
+  {
+    "value": "121",
+    "text": "SAMA"
+  },
+  {
+    "value": "10",
+    "text": "Samsung"
+  },
+  {
+    "value": "17",
+    "text": "SanDisk"
+  },
+  {
+    "value": "157",
+    "text": "SCORPIUS"
+  },
+  {
+    "value": "106",
+    "text": "SEAGATE"
+  },
+  {
+    "value": "96",
+    "text": "SEGA"
+  },
+  {
+    "value": "156",
+    "text": "SHOKZ"
+  },
+  {
+    "value": "107",
+    "text": "Silicon Power"
+  },
+  {
+    "value": "27",
+    "text": "Silver Line"
+  },
+  {
+    "value": "135",
+    "text": "SK HYNIX"
+  },
+  {
+    "value": "62",
+    "text": "SKYLOONG"
+  },
+  {
+    "value": "122",
+    "text": "Solid"
+  },
+  {
+    "value": "117",
+    "text": "Solidigm"
+  },
+  {
+    "value": "29",
+    "text": "Sony"
+  },
+  {
+    "value": "26",
+    "text": "Sparkfox"
+  },
+  {
+    "value": "91",
+    "text": "SQUARE ENIX"
+  },
+  {
+    "value": "169",
+    "text": "STEALTH"
+  },
+  {
+    "value": "37",
+    "text": "SteelSeries"
+  },
+  {
+    "value": "101",
+    "text": "STLab"
+  },
+  {
+    "value": "119",
+    "text": "Sunn"
+  },
+  {
+    "value": "83",
+    "text": "SYNOLOGY"
+  },
+  {
+    "value": "143",
+    "text": "TAPO"
+  },
+  {
+    "value": "163",
+    "text": "TeamGroup"
+  },
+  {
+    "value": "71",
+    "text": "Teltonika"
+  },
+  {
+    "value": "142",
+    "text": "ThinkPad"
+  },
+  {
+    "value": "57",
+    "text": "Thrustmaster"
+  },
+  {
+    "value": "86",
+    "text": "Toshiba"
+  },
+  {
+    "value": "11",
+    "text": "TP-Link"
+  },
+  {
+    "value": "129",
+    "text": "Transcend"
+  },
+  {
+    "value": "84",
+    "text": "Turtle Beach"
+  },
+  {
+    "value": "82",
+    "text": "Ubiquiti"
+  },
+  {
+    "value": "89",
+    "text": "Ubisoft"
+  },
+  {
+    "value": "132",
+    "text": "UGREEN"
+  },
+  {
+    "value": "148",
+    "text": "UNITEK"
+  },
+  {
+    "value": "105",
+    "text": "v-color"
+  },
+  {
+    "value": "111",
+    "text": "Verbatim"
+  },
+  {
+    "value": "30",
+    "text": "ViewSonic"
+  },
+  {
+    "value": "80",
+    "text": "VIVO"
+  },
+  {
+    "value": "95",
+    "text": "W-KING"
+  },
+  {
+    "value": "92",
+    "text": "Warner Bros Games"
+  },
+  {
+    "value": "166",
+    "text": "WEBCAM"
+  },
+  {
+    "value": "16",
+    "text": "Western Digital"
+  },
+  {
+    "value": "109",
+    "text": "wiz"
+  },
+  {
+    "value": "12",
+    "text": "Xbox"
+  },
+  {
+    "value": "158",
+    "text": "XEROX"
+  },
+  {
+    "value": "13",
+    "text": "Xiaomi"
+  },
+  {
+    "value": "75",
+    "text": "XPG"
+  },
+  {
+    "value": "172",
+    "text": "XtrikeMe"
+  },
+  {
+    "value": "98",
+    "text": "Zalman"
+  },
+  {
+    "value": "178",
+    "text": "ZTE"
+  }
+]

@@ -1,0 +1,29 @@
+Attributes for Category 281 (אוזניות אלחוטיות):
+  Index 105 | Col DB | Name: ערוצים
+  Index 136 | Col EG | Name: שמע
+  Index 183 | Col GB | Name: רמקולים מובנים
+  Index 189 | Col GH | Name: אוזניות בלוטוס Bluetooth
+  Index 190 | Col GI | Name: כיסוי לאוזניות
+  Index 191 | Col GJ | Name: מעמד לאוזניות
+  Index 192 | Col GK | Name: רמקולים למחשב
+  Index 193 | Col GL | Name: רמקול נייד
+  Index 210 | Col HC | Name: שמע AIO
+  Index 220 | Col HM | Name: Channels
+  Index 221 | Col HN | Name: Bluetooth
+  Index 248 | Col IO | Name: סוג חיבור שמע
+
+================================================================================
+
+Attributes for Category 282 (אוזניות חוטיות):
+  Index 105 | Col DB | Name: ערוצים
+  Index 136 | Col EG | Name: שמע
+  Index 183 | Col GB | Name: רמקולים מובנים
+  Index 189 | Col GH | Name: אוזניות בלוטוס Bluetooth
+  Index 190 | Col GI | Name: כיסוי לאוזניות
+  Index 191 | Col GJ | Name: מעמד לאוזניות
+  Index 192 | Col GK | Name: רמקולים למחשב
+  Index 193 | Col GL | Name: רמקול נייד
+  Index 210 | Col HC | Name: שמע AIO
+  Index 220 | Col HM | Name: Channels
+  Index 221 | Col HN | Name: Bluetooth
+  Index 248 | Col IO | Name: סוג חיבור שמע

@@ -1,0 +1,129 @@
+Brand Code: 110 | Count in sample: 1
+  Sample Products: אוזניות חתול Edifier G5BT Wireless Low Latency Gaming Headset PINK Cat ורוד
+--------------------------------------------------------------------------------
+Brand Code: 12 | Count in sample: 68
+  Sample Products: Harry Potter Quidditch Champions Deluxe Edition XBOX1, Xbox Series S ומשחק Minecraft Dungeons, Xbox One S שני שלטים פיפא 21 ומשחק מתנה ומטען, Xbox One S שני שלטים פיפא ומשחק מתנה, Xbox One S שני שלטים משחק Battlefield V ומשחק מתנה
+--------------------------------------------------------------------------------
+Brand Code: 125 | Count in sample: 1
+  Sample Products: בקר נינטנדו אדום - PowerA Here We Go Mario Wireless Rechargeable Contrioller
+--------------------------------------------------------------------------------
+Brand Code: 14 | Count in sample: 1
+  Sample Products: אוזניות ACER PREDATOR GALEA
+--------------------------------------------------------------------------------
+Brand Code: 149 | Count in sample: 1
+  Sample Products: אוזניות גיימינג ONIKUMA K10
+--------------------------------------------------------------------------------
+Brand Code: 15 | Count in sample: 1
+  Sample Products: אוזניות חוטיות גיימינג MSI Gaming Immerse Headset GH50
+--------------------------------------------------------------------------------
+Brand Code: 152 | Count in sample: 1
+  Sample Products: מתאם ארגונומי לשלט XBOX KONTROL FREEK BATTLE ROYALE NIGHTFALL שחור
+--------------------------------------------------------------------------------
+Brand Code: 157 | Count in sample: 2
+  Sample Products: אוזניות + מיקרופון לגיימינג SILVER LINE SCORPIUS GHD-099V, אוזניות ומיקרופון מבית SCORPIUS דגם HS-88V
+--------------------------------------------------------------------------------
+Brand Code: 16 | Count in sample: 3
+  Sample Products: כונן חיצוני WD_BLACK D30 SSD 1TB FOR XBOX, כונן חיצוני WD_BLACK D30 SSD 2TB FOR XBOX, כונן חיצוני WD_BLACK D30 SSD 500GB FOR XBOX
+--------------------------------------------------------------------------------
+Brand Code: 169 | Count in sample: 1
+  Sample Products: אוזניות אלחוטיות לנינטנדו STEALTH S-One Stereo Gaming אפור
+--------------------------------------------------------------------------------
+Brand Code: 18 | Count in sample: 34
+  Sample Products: הגה מרוצים לקונסולות Logitech G29 Driving Force   PC / PlayStation, הגה מרוצים + דוושות ותיבת הילוכים PS4 Logitech G29 Driving Force, מושב מירוצים לבן הגה ודוושות LOGITECH G29 ותיבת הילוכים PC / PlayStation, הגה ודוושות LOGITECH G923 Wheel PS4/PC, הגה מירוצים Logitech Driving Force G920 Xbox
+--------------------------------------------------------------------------------
+Brand Code: 21 | Count in sample: 58
+  Sample Products: שלט חוטי RAZER Raion Arcade Gamepad PS4  שחור, שלט אלחוטי PS4 RAZER Raiju TOURNAMENT 2019, בקר RAZER Raiju Ultimate For PS4 2109, עמדת טעינה מהירה לשלטי RAZER PS5 לבן, אוזניות גיימינג חוטיות RAZER KAIRA X FOR PLAYSTATION
+--------------------------------------------------------------------------------
+Brand Code: 22 | Count in sample: 5
+  Sample Products: מחשב ALL IN ONE IP AIO 3 27IAP7 I5-12450H 16GB 512GB SSD 27 FHD DOS White 1Y *לא קיים אצל ספק*, אוזניות גיימינג Lenovo Legion H300 Stereo Gaming Headset, אוזניות גיימינג Lenovo Legion H500 Pro 7.1 Surround Sound Gaming, אוזניות גיימינג עם חוט LENOVO ideapad gaming H100 HEADSET, LENOVO LEGION H200 GAMING HEADSET אוזניות
+--------------------------------------------------------------------------------
+Brand Code: 25 | Count in sample: 33
+  Sample Products: אוזניות חוטיות גיימינג Corsair HS35 שחור, אוזניות חוטיות גיימינג Corsair HS60 Haptic, אוזניות גיימינג אלחוטיות Corsair Virtuoso RGB לבן, אוזניות חוטיות גיימינג Corsair HS60 Pro Surround, אוזניות גיימינג חוטית עם חיבור בלוטוס Corsair HS70
+--------------------------------------------------------------------------------
+Brand Code: 26 | Count in sample: 18
+  Sample Products: כיסא גיימינג SparkFox Playgame MPS2, תושבת טעינה כפולה לשימוש עם 5®PLAYSTATION מבית SPARKFOX, מעמד קירור טעינה+2 סוללות SparkFox MultiFunction Charge Dock, מטען כפול Sparkfox Dual Controller Charging Xbox Series, מעמד טעינה SparkFox Dual Charger Xbox One
+--------------------------------------------------------------------------------
+Brand Code: 29 | Count in sample: 204
+  Sample Products: משחק Mortal Kombat 11 Ultimate Edition PS5, שמחק Gotham Knights PS5, SPONGEBOB SQUAREPANTS THE COSMIC SHAKE PS4, WWE 2K23 PS4, WWE 2K23 PS5
+--------------------------------------------------------------------------------
+Brand Code: 32 | Count in sample: 9
+  Sample Products: מתאם המיקרופון של  ASUS Noise-Canceling, ASUS TUF H3 Gaming Headset (Red), אוזניות ASUS TUF GAMING H1 WL, אוזניות ASUS ROG DELTA CORE, ASUS ROG Delta White Edition Headset Head-band USB Type-C
+--------------------------------------------------------------------------------
+Brand Code: 34 | Count in sample: 29
+  Sample Products: PS5 Yakuza: Like a Dragon, Dragon Ball Xenoverse 1+2 PS4, PS4 Dragon Ball Fighterz + Dragon Ball Xenoverse 2, מטען זוגי לשלטי סוני 5 Dragon Dual Pro Charger PS5, עמדת טעינה זוגית PS4 Dragon DualCharging
+--------------------------------------------------------------------------------
+Brand Code: 36 | Count in sample: 5
+  Sample Products: Microsoft Flight Simulator Xbox Series, משחק Minecraft עם תוספת XBOX ONE / SERIES 3500 Minecoins, WWE 2K24 XBOX, שלט אלחוטי Xbox Elite Wireless Controller Series 2 Core White לבן, שלט אלחוטי מיקרוסופט Xbox Series X Wireless MINERAL CAMO כחול צבאי
+--------------------------------------------------------------------------------
+Brand Code: 37 | Count in sample: 37
+  Sample Products: אוזניות גיימינג SteelSeries Arctis 1, אוזניות גיימינג ‏אלחוטיות SteelSeries Arctis 1 Wireless, אוזניות גיימינג SteelSeries Arctis 5 RGB &amp; DTS 7.1 Surround USB, אוזניות ‏גיימינג SteelSeries Arctis 3, אוזניות גיימינג ‏אלחוטיות +SteelSeries Arctis 7 לבן
+--------------------------------------------------------------------------------
+Brand Code: 39 | Count in sample: 2
+  Sample Products: Pokmon Shield + Pokmon Shield Expansion Pass The Isle of Armor + The Crown Tundra NINTENDO, אוזניות גיימינג Pokemon Wired Gaming Headset Pikachu
+--------------------------------------------------------------------------------
+Brand Code: 40 | Count in sample: 5
+  Sample Products: אוזניות גיימינג JBL Quantum 200, אוזניות גיימינג JBL Quantum 300, אוזניות גיימינג JBL Quantum 600, אוזניות גיימינג אלחוטיות JBL Quantum 800, אוזניות גיימינג JBL QUANTUM 100 לבן
+--------------------------------------------------------------------------------
+Brand Code: 41 | Count in sample: 2
+  Sample Products: אוזניות גיימרים אלחוטיות DTS 7.1 Surround LAG-FRE שחור, Play Wireless Earbuds אוזניות גיימינג
+--------------------------------------------------------------------------------
+Brand Code: 42 | Count in sample: 4
+  Sample Products: אוזניות גיימינג COUGAR Phontum Essential Headsets שחור, אוזניות גיימינג ורודות COUGAR Phontum Essential Headsets ורוד, אוזניות גיימינג COUGAR PHONTUM PRO Headsets שחור, אוזניות גיימינג COUGAR IMMERSA PRO PRIX Headsets
+--------------------------------------------------------------------------------
+Brand Code: 55 | Count in sample: 2
+  Sample Products: אוזניות + מיקרופון COOLER MASTER MH-752 HEADPHONES, אוזניות גיימינג Cooler Master MH630 Mic PL PC/XBOX/PS And Mobile
+--------------------------------------------------------------------------------
+Brand Code: 57 | Count in sample: 31
+  Sample Products: הגה thrustmaster T80 Racing Wheel, הגה מירוצים עם דוושות Thrustmaster T300 RS GT Edition PS4, הגה Thrustmaster T150 Ferrari Force Feedback, הגה  Thrustmaster T150 PRO ForceFeedback, בקר משחק Thrustmaster – ESWAP Pro -מתאים ל PC / PS4
+--------------------------------------------------------------------------------
+Brand Code: 64 | Count in sample: 5
+  Sample Products: מדפסת ‏הזרקת דיו HP Smart Tank 519 3YW73A, אוזניות ‏חוטיות HP Pavilion Gaming Headset 600 4BX33AA, אוזניות ‏חוטיות HP Omen Blast Headset 1A858AA, אוזניות HP OMEN Mindframe2 שחור, אוזניות HP OMEN Mindframe2 לבן
+--------------------------------------------------------------------------------
+Brand Code: 65 | Count in sample: 1
+  Sample Products: אוזניות חוטיות גיימינג Gamdias HEBE M2 RGB
+--------------------------------------------------------------------------------
+Brand Code: 7 | Count in sample: 319
+  Sample Products: משחק LEGO BATMAN LEGACY OF THE DARK KNIGHT PS5, משחק Onimusha way of the sword PS5, Nintendo Switch מהדורת Mario Kart 8 Deluxe ומנוי אונליין, Nintendo Switch נינטנדו אפור, Nintendo Switch נינטנדו כחול אדום יבואן רשמי
+--------------------------------------------------------------------------------
+Brand Code: 76 | Count in sample: 4
+  Sample Products: אוזניות גיימינג Creative HEADSET CREATIVE SXFI GAMER, אוזניות גיימינג Creative SOUND BLASTERX H6, אוזניות גיימינג CREATIVE Headset Sound BlasterX H6  7.1, אוזניות גיימינג לאקס בוקס CREATIVE  HS-H6-BK שחור
+--------------------------------------------------------------------------------
+Brand Code: 77 | Count in sample: 4
+  Sample Products: אוזניות גיימינג 3.5 מ"מ ROCCAT ELO X, אוזניות גיימינג ROCCAT ELO USB 7.1 RGB שחור, אוזניות גיימינג אלחוטית ROCCAT ELO AIR 7.1 לבן, אוזניות גיימינג אלחוטית ROCCAT ELO AIR 7.1 שחור
+--------------------------------------------------------------------------------
+Brand Code: 78 | Count in sample: 7
+  Sample Products: מעמד למסך Next Level Racing F-GT Monitor Stand, מושב סימולצייה טייס Next Level Racing GTtrack Playstation Edition Cockpit, מושב טייס סימולטור Next Level Racing F-GT Formula and GT Simulator Cockpit, מושב סימולציה Next Level Racing Challenger Racing Simulator Cockpit, מושב Next Level Racing F-GT Lite Cockpit
+--------------------------------------------------------------------------------
+Brand Code: 84 | Count in sample: 31
+  Sample Products: שלט גיימינג חוטי Turtle Beach RECON PC/XBOX שחור, שלט גיימינג חוטי Turtle Beach RECON PC/XBOX לבן, בקר ומצערת טיס Turtle Beach VelocityOne Flight, דוושות לבקר טיסה Turtle Beach VelocityOne Rudder, ג'ויסטיק טיסה Turtle Beach VelocityOne Flightstick
+--------------------------------------------------------------------------------
+Brand Code: 85 | Count in sample: 7
+  Sample Products: Dead Space PS5, STAR WARS Jedi: Survivor™ PS5, STAR WARS Jedi: Survivor™ Deluxe Edition PS5, UFC 4 Xbox One, Dead Space XBOX SX
+--------------------------------------------------------------------------------
+Brand Code: 87 | Count in sample: 2
+  Sample Products: הגה מרוצים דוושות וידית הילוכים GENIUS SpeedMaster X2, הגה מרוצים דוושות וידית הילוכים GENIUS SpeedMaster
+--------------------------------------------------------------------------------
+Brand Code: 88 | Count in sample: 4
+  Sample Products: GTA V Premium Online Edition PS4, משחק Red Dead Redemption 2 PS4, GTA V Premium Online Edition Xbox, Grand Theft Auto: The Trilogy – The Definitive Edition Xbox
+--------------------------------------------------------------------------------
+Brand Code: 89 | Count in sample: 19
+  Sample Products: Rayman Legends PS4, Tom Clancy’s Ghost Recon Breakpoint PS4, The Crew 2 PS4, Assassin's Creed Valhalla PS4, Watch Dogs Legion - Standard Edition PS4
+--------------------------------------------------------------------------------
+Brand Code: 90 | Count in sample: 17
+  Sample Products: משחק Call of Duty World War II PS4, Call Of Duty: Black Ops 4 PS4, Spyro Reignited Trilogy PS4, Crash Bandicoot 4 - It's About Time PS4, Call Of Duty Black Ops Cold War PS4
+--------------------------------------------------------------------------------
+Brand Code: 91 | Count in sample: 6
+  Sample Products: Marvel's Avengers PS4, HITMAN 3 PS5, Forspoken Ps5, Final Fantasy XVI Standard Edition PS5, Final Fantasy XVI Deluxe Edition PS5
+--------------------------------------------------------------------------------
+Brand Code: 92 | Count in sample: 6
+  Sample Products: Hogwarts Legacy PS5, Hogwarts Legacy Deluxe Edition Ps5, Mortal Kombat 11 PS5, PS4 DCs Justice League Cosmic Chaos, PS5 DC's Justice League Cosmic Chaos
+--------------------------------------------------------------------------------
+Brand Code: 93 | Count in sample: 1
+  Sample Products: Tiny Tina's Wonderlands PS5
+--------------------------------------------------------------------------------
+Brand Code: 96 | Count in sample: 4
+  Sample Products: Like a Dragon: Ishin! PS5, Like a Dragon: Ishin! PS4, LIKE A DRAGON: PIRATE YAKUZA IN HAWAII PS5, Like a Dragon: Ishin! XS XO
+--------------------------------------------------------------------------------
+Brand Code: 98 | Count in sample: 5
+  Sample Products: אוזניות ZALMAN GAMING HEADSET HPS300, אוזניות גיימינג חוטיות ZALMAN GAMING HEADSET ZM-HPS310 RGB, אוזניות גיימינג ZALMAN GAMING HEADSET ZM-HPS310 RGB לבן, אוזניות גיימינג ZALMAN ARCHER WIRELESS GAMING HEADSET שחור, אוזניות גיימינג ZALMAN ARCHER WIRELESS GAMING HEADSET לבן
+--------------------------------------------------------------------------------

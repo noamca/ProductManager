@@ -1,0 +1,35 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# SQLite and local runtime data
+*.db
+*.db-shm
+*.db-wal
+
+# Logs and process output
+*.log
+process_run.log
+
+# Browser profiles and Selenium runtime state
+chrome-debug-profile/
+chrome-debug-profile-new/
+chrome-profile/
+chrome-profile-headless/
+chrome-profile-morlevi/
+chrome-profile-watch/
+
+# Generated downloads and reports
+king_games_product_manager/downloads/
+daily-price-checker/data/
+daily-price-checker/reports/
+
+# Local duplicate/archive folder
+scratch/
+
+# OS/editor artifacts
+.DS_Store
+Thumbs.db

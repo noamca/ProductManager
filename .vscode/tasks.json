@@ -1,0 +1,820 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "kg-restart-kill-8000",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){Stop-Process -Id $c.OwningProcess -Force; Write-Output ('KILLED_PID=' + $c.OwningProcess)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-check-8000-process-path",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){$p=Get-CimInstance Win32_Process -Filter \"ProcessId=$($c.OwningProcess)\"; Write-Output ('PID=' + $c.OwningProcess); Write-Output ('EXE=' + $p.ExecutablePath); Write-Output ('CMD=' + $p.CommandLine)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-kill-8000-forced",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){Stop-Process -Id $c.OwningProcess -Force; Write-Output ('KILLED_PID=' + $c.OwningProcess)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-start-absolute-server-path",
+			"type": "shell",
+			"command": "& \"C:\\Users\\USER\\AppData\\Local\\Programs\\Python\\Python314\\python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\"",
+			"isBackground": true
+		},
+		{
+			"label": "kg-check-8000-path-after-restart",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){$p=Get-CimInstance Win32_Process -Filter \"ProcessId=$($c.OwningProcess)\"; Write-Output ('PID=' + $c.OwningProcess); Write-Output ('CMD=' + $p.CommandLine)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-check-automated-processes-schema",
+			"type": "shell",
+			"command": "& \"C:\\Users\\USER\\AppData\\Local\\Programs\\Python\\Python314\\python.exe\" -c \"import sqlite3; db=r'C:\\Projects\\KINGGAMES\\king_games_product_manager\\products.db'; c=sqlite3.connect(db).cursor(); row=c.execute(\\\"SELECT sql FROM sqlite_master WHERE type='table' AND name='automated_processes'\\\").fetchone(); print(row[0] if row else 'NO_TABLE')\""
+		},
+		{
+			"label": "kg-create-monthly-google-process",
+			"type": "shell",
+			"command": "$body = '{\"name\":\"עדכון מכירות גוגל חודשי\",\"script_path\":\"process_google_prices_update_clone.py\",\"interval_value\":1,\"interval_unit\":\"days\",\"enabled\":true}'; Invoke-RestMethod -Uri \"http://127.0.0.1:8000/api/processes/create\" -Method Post -ContentType \"application/json\" -Body $body | ConvertTo-Json -Compress"
+		},
+		{
+			"label": "kg-create-monthly-google-process-curl",
+			"type": "shell",
+			"command": "curl.exe -s -X POST \"http://127.0.0.1:8000/api/processes/create\" -H \"Content-Type: application/json\" -d \"{\\\"name\\\":\\\"monthly-google-sales-update\\\",\\\"script_path\\\":\\\"process_google_prices_update_clone.py\\\",\\\"interval_value\\\":1,\\\"interval_unit\\\":\\\"days\\\",\\\"enabled\\\":true}\""
+		},
+		{
+			"label": "kg-create-monthly-process-irm-hashtable",
+			"type": "shell",
+			"command": "$payload = @{name='monthly-google-sales-update'; script_path='process_google_prices_update_clone.py'; interval_value=1; interval_unit='days'; enabled=$true}; $body = $payload | ConvertTo-Json -Compress; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/processes/create' -Method Post -ContentType 'application/json' -Body $body | ConvertTo-Json -Compress"
+		},
+		{
+			"label": "kg-kill-8000-restart-2",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){Stop-Process -Id $c.OwningProcess -Force; Write-Output ('KILLED_PID=' + $c.OwningProcess)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-start-absolute-server-2",
+			"type": "shell",
+			"command": "& \"C:\\Users\\USER\\AppData\\Local\\Programs\\Python\\Python314\\python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\"",
+			"isBackground": true
+		},
+		{
+			"label": "kg-delete-duplicate-process-73",
+			"type": "shell",
+			"command": "$body = @{id=73} | ConvertTo-Json -Compress; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/processes/delete' -Method Post -ContentType 'application/json' -Body $body | ConvertTo-Json -Compress"
+		},
+		{
+			"label": "kg-run-hebrew-monthly-process",
+			"type": "shell",
+			"command": "$body = @{id=68} | ConvertTo-Json -Compress; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/processes/run-now' -Method Post -ContentType 'application/json' -Body $body | ConvertTo-Json -Compress"
+		},
+		{
+			"label": "kg-kill-8000-final",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){Stop-Process -Id $c.OwningProcess -Force; Write-Output ('KILLED_PID=' + $c.OwningProcess)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-start-absolute-final",
+			"type": "shell",
+			"command": "& \"C:\\Users\\USER\\AppData\\Local\\Programs\\Python\\Python314\\python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\"",
+			"isBackground": true
+		},
+		{
+			"label": "kg-run-monthly-process-id-68-final",
+			"type": "shell",
+			"command": "$body = @{id=68} | ConvertTo-Json -Compress; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/processes/run-now' -Method Post -ContentType 'application/json' -Body $body | ConvertTo-Json -Compress"
+		},
+		{
+			"label": "kg-tail-process-log",
+			"type": "shell",
+			"command": "Get-Content \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\process_run.log\" -Tail 120"
+		},
+		{
+			"label": "kg-kill-8000-after-scheduler-fix",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){Stop-Process -Id $c.OwningProcess -Force; Write-Output ('KILLED_PID=' + $c.OwningProcess)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-start-absolute-after-scheduler-fix",
+			"type": "shell",
+			"command": "& \"C:\\Users\\USER\\AppData\\Local\\Programs\\Python\\Python314\\python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\"",
+			"isBackground": true
+		},
+		{
+			"label": "kg-run-monthly-id-68-after-fix",
+			"type": "shell",
+			"command": "$body = @{id=68} | ConvertTo-Json -Compress; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/processes/run-now' -Method Post -ContentType 'application/json' -Body $body | ConvertTo-Json -Compress"
+		},
+		{
+			"label": "kg-tail-process-log-latest",
+			"type": "shell",
+			"command": "Get-Content \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\process_run.log\" -Tail 60"
+		},
+		{
+			"label": "kg-check-sap-error-message",
+			"type": "shell",
+			"command": "try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8000/api/sap/salespersons' -UseBasicParsing; Write-Output $r.Content } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.BaseStream.Position = 0; $reader.DiscardBufferedData(); $body = $reader.ReadToEnd(); Write-Output $body } else { Write-Output $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-kill-8000-use-venv",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){Stop-Process -Id $c.OwningProcess -Force; Write-Output ('KILLED_PID=' + $c.OwningProcess)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-start-server-venv-python",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\"",
+			"isBackground": true
+		},
+		{
+			"label": "kg-check-sap-salespersons-after-venv",
+			"type": "shell",
+			"command": "try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8000/api/sap/salespersons' -UseBasicParsing; Write-Output $r.StatusCode; Write-Output $r.Content } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $body = $reader.ReadToEnd(); Write-Output $body } else { Write-Output $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-run-monthly-68-after-venv",
+			"type": "shell",
+			"command": "$body = @{id=68} | ConvertTo-Json -Compress; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/processes/run-now' -Method Post -ContentType 'application/json' -Body $body | ConvertTo-Json -Compress"
+		},
+		{
+			"label": "kg-verify-8000-cmd-now",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){$p=Get-CimInstance Win32_Process -Filter \"ProcessId=$($c.OwningProcess)\"; Write-Output ('PID=' + $c.OwningProcess); Write-Output ('CMD=' + $p.CommandLine)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-kill-all-serverpy",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^python(\\.exe)?$' -and $_.CommandLine -like '*king_games_product_manager*server.py*' }; if($procs){ $procs | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; Write-Output ('KILLED_PID=' + $_.ProcessId) } } else { Write-Output 'NO_SERVER_PY_PROCS' }"
+		},
+		{
+			"label": "kg-verify-8000-cmd-after-clean",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){$p=Get-CimInstance Win32_Process -Filter \"ProcessId=$($c.OwningProcess)\"; Write-Output ('PID=' + $c.OwningProcess); Write-Output ('CMD=' + $p.CommandLine)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-check-sap-salespersons-final",
+			"type": "shell",
+			"command": "try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8000/api/sap/salespersons' -UseBasicParsing; Write-Output $r.Content } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $body = $reader.ReadToEnd(); Write-Output $body } else { Write-Output $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-run-monthly-68-success-check",
+			"type": "shell",
+			"command": "$body = @{id=68} | ConvertTo-Json -Compress; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/processes/run-now' -Method Post -ContentType 'application/json' -Body $body | ConvertTo-Json -Compress"
+		},
+		{
+			"label": "kg-wait-read-last-log-lines",
+			"type": "shell",
+			"command": "Get-Content \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\process_run.log\" -Tail 40"
+		},
+		{
+			"label": "kg-check-sales-report-endpoint-body",
+			"type": "shell",
+			"command": "try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8000/api/sap/sales-report?date_from=2026-07-01&date_to=2026-07-05' -UseBasicParsing; Write-Output $r.Content } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $body = $reader.ReadToEnd(); Write-Output $body } else { Write-Output $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-kill-8000-after-clone-fix",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){Stop-Process -Id $c.OwningProcess -Force; Write-Output ('KILLED_PID=' + $c.OwningProcess)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-run-monthly-68-after-final-fix",
+			"type": "shell",
+			"command": "$body = @{id=68} | ConvertTo-Json -Compress; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/processes/run-now' -Method Post -ContentType 'application/json' -Body $body | ConvertTo-Json -Compress"
+		},
+		{
+			"label": "kg-kill-8000-before-run-both",
+			"type": "shell",
+			"command": "$c=Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if($c){Stop-Process -Id $c.OwningProcess -Force; Write-Output ('KILLED_PID=' + $c.OwningProcess)} else {Write-Output 'NO_LISTENER'}"
+		},
+		{
+			"label": "kg-run-original-google-script",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\process_google_prices_update.py\""
+		},
+		{
+			"label": "kg-run-clone-google-script",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\process_google_prices_update_clone.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-script-syntax",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-script-syntax-v2",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-script-check",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-script-crash-fix",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-script-after-crash-fix",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-script-recovery-fix",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-script-after-window-fix",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-send-fallbacks",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-script-send-test-v2",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-group-open-fix",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-script-send-test-v3",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-bmp-fix",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-script-send-test-v4",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-preview-send-fix",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-script-send-test-v5",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-selector-update",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-with-new-send-selector",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-send-selector-user-xpath",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-send-with-user-xpath",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-final",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-final-check",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-validate-whatsapp-retry-hardening",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" -m py_compile \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-run-whatsapp-retry-hardened",
+			"type": "shell",
+			"command": "& \"c:/Projects/KINGGAMES/.venv/Scripts/python.exe\" \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\send_dashboard_screenshot_to_whatsapp.py\""
+		},
+		{
+			"label": "kg-cancel-whatsapp-cleanup-artifacts",
+			"type": "shell",
+			"command": "$base='C:\\Projects\\KINGGAMES\\king_games_product_manager'; $paths=@(\"$base\\dashboard_row18.png\",\"$base\\whatsapp_send_debug.png\",\"$base\\chrome-profile-whatsapp\",\"$base\\chrome-profile-whatsapp_fallback\"); foreach($p in $paths){ if(Test-Path $p){ Remove-Item -LiteralPath $p -Recurse -Force; Write-Output ('REMOVED=' + $p) } else { Write-Output ('MISSING=' + $p) } }"
+		},
+		{
+			"label": "kg-cancel-whatsapp-cleanup-artifacts-2",
+			"type": "shell",
+			"command": "$paths=@('C:\\Projects\\KINGGAMES\\king_games_product_manager\\dashboard_row18.png','C:\\Projects\\KINGGAMES\\king_games_product_manager\\whatsapp_send_debug.png','C:\\Projects\\KINGGAMES\\king_games_product_manager\\chrome-profile-whatsapp','C:\\Projects\\KINGGAMES\\king_games_product_manager\\chrome-profile-whatsapp_fallback'); foreach($p in $paths){ if(Test-Path -LiteralPath $p){ Remove-Item -LiteralPath $p -Recurse -Force; Write-Output ('REMOVED=' + $p) } else { Write-Output ('MISSING=' + $p) } }"
+		},
+		{
+			"label": "kg-check-sku-35568",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe -c \"import sqlite3; db=r'C:\\Projects\\KINGGAMES\\king_games_product_manager\\products.db'; conn=sqlite3.connect(db); cur=conn.cursor(); cur.execute('SELECT COUNT(*) FROM products'); print('COUNT',cur.fetchone()); cur.execute(\\\"SELECT mg_id,title,sap_sku,supplier1_sku,supplier2_sku,supplier3_sku FROM products WHERE mg_id='35568' OR sap_sku='35568' OR supplier1_sku='35568' OR supplier2_sku='35568' OR supplier3_sku='35568' LIMIT 5\\\"); print('DIRECT',cur.fetchall()); cur.execute(\\\"SELECT mg_id,title,sap_sku FROM products WHERE CAST(mg_id AS TEXT)='35568' LIMIT 5\\\"); print('CAST',cur.fetchall()); conn.close()\""
+		},
+		{
+			"label": "kg-run-check-sku-35568-script",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/check_sku_35568.py"
+		},
+		{
+			"label": "kg-run-check-sku-35568-both-dbs",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/check_sku_35568_both_dbs.py"
+		},
+		{
+			"label": "kg-inspect-products-schema",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/inspect_products_schema.py"
+		},
+		{
+			"label": "kg-read-mg-import-job",
+			"type": "shell",
+			"command": "if (Test-Path 'C:\\Temp\\mg_import_job.json') { Get-Content -Raw 'C:\\Temp\\mg_import_job.json' } else { Write-Output 'MISSING_JOB_FILE' }"
+		},
+		{
+			"label": "kg-rerun-mg-import-upsert",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/mg_import_runner.py --job C:/Temp/mg_import_job.json"
+		},
+		{
+			"label": "kg-verify-sku-35568-after-import",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/check_sku_35568.py"
+		},
+		{
+			"label": "kg-verify-resolve-api-35568",
+			"type": "shell",
+			"command": "$body = @{ query = '35568' } | ConvertTo-Json; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/resolve-product' -Method Post -ContentType 'application/json; charset=utf-8' -Body $body | ConvertTo-Json -Depth 6 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-verify-resolver-func-35568",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/verify_resolve_35568.py"
+		},
+		{
+			"label": "kg-check-port-8000-listener",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $conn | Select-Object LocalAddress,LocalPort,OwningProcess,State | Format-Table -AutoSize | Out-String; Get-CimInstance Win32_Process -Filter (\"ProcessId=\" + $conn.OwningProcess) | Select-Object ProcessId,Name,CommandLine | Format-List | Out-String } else { 'NO_LISTENER_ON_8000' }"
+		},
+		{
+			"label": "kg-check-port-8000-process",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $pid = $conn[0].OwningProcess; Write-Output ('PID=' + $pid); Get-Process -Id $pid | Select-Object Id,ProcessName,Path | Format-List | Out-String } else { 'NO_LISTENER_ON_8000' }"
+		},
+		{
+			"label": "kg-verify-resolve-api-python",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/verify_resolve_api_35568.py"
+		},
+		{
+			"label": "kg-verify-resolve-api-correct-route",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/verify_resolve_api_35568.py"
+		},
+		{
+			"label": "kg-apply-desktop-5441-33110-to-35568",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/replace_desktop_tree_component.py --old-id 33110 --new-id 35568 --desktop-id 5441 --apply"
+		},
+		{
+			"label": "kg-verify-new-apply-endpoint-live",
+			"type": "shell",
+			"command": "$body='{\"old_query\":\"33110\",\"new_query\":\"35568\",\"desktop_ids\":[\"5441\"],\"max_pages\":1}'; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/apply' -Method Post -ContentType 'application/json' -Body $body | ConvertTo-Json -Depth 6 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-verify-apply-endpoint-python",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/verify_apply_endpoint.py"
+		},
+		{
+			"label": "kg-restart-main-server-for-desktop-apply",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 3; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/resolve?query=35568' -Method Get | ConvertTo-Json -Depth 6 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-verify-apply-endpoint-after-restart",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/verify_apply_endpoint.py"
+		},
+		{
+			"label": "kg-restart-server-after-replacement-quality-fix",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 3; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/resolve?query=35568' -Method Get | ConvertTo-Json -Depth 6 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-restart-server-before-full-desktop-run",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 4; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/resolve?query=35568' -Method Get | ConvertTo-Json -Depth 5 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-apply-33110-to-35568-all-desktops-with-verify",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/replace_desktop_tree_component.py --old-id 33110 --new-id 35568 --scan-category --max-pages 40 --apply"
+		},
+		{
+			"label": "kg-check-running-replace-process",
+			"type": "shell",
+			"command": "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' } | Select-Object ProcessId,Name,CommandLine | Format-List | Out-String"
+		},
+		{
+			"label": "kg-stop-duplicate-replace-processes",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if (-not $procs) { Write-Output 'NO_REPLACE_PROCESSES' } else { foreach($p in $procs){ try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop; Write-Output ('STOPPED=' + $p.ProcessId) } catch { Write-Output ('STOP_FAILED=' + $p.ProcessId + ' ' + $_.Exception.Message) } } }"
+		},
+		{
+			"label": "kg-run-full-replace-single-with-logfile",
+			"type": "shell",
+			"command": "$ts = Get-Date -Format 'yyyyMMdd_HHmmss'; $log = \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\desktop_replace_full_run_33110_to_35568_$ts.log\"; $reportHint = \"LOG_FILE=$log\"; Write-Output $reportHint; c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/replace_desktop_tree_component.py --old-id 33110 --new-id 35568 --scan-category --max-pages 40 --apply *> $log; Write-Output \"RUN_DONE\"; Get-Content -Tail 80 $log"
+		},
+		{
+			"label": "kg-run-full-replace-single-with-logfile-2",
+			"type": "shell",
+			"command": "$ts = Get-Date -Format yyyyMMdd_HHmmss; $log = 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\desktop_replace_full_run_33110_to_35568_' + $ts + '.log'; Write-Output ('LOG_FILE=' + $log); & 'c:/Projects/KINGGAMES/.venv/Scripts/python.exe' 'c:/Projects/KINGGAMES/king_games_product_manager/replace_desktop_tree_component.py' --old-id 33110 --new-id 35568 --scan-category --max-pages 40 --apply *> $log; Write-Output 'RUN_DONE'; Get-Content -Tail 80 $log"
+		},
+		{
+			"label": "kg-check-replace-running-after-rerun",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ $procs | Select-Object ProcessId,Name,CommandLine | Format-List | Out-String } else { 'NO_REPLACE_PROCESS_RUNNING' }"
+		},
+		{
+			"label": "kg-tail-latest-full-run-log",
+			"type": "shell",
+			"command": "$log = Get-ChildItem 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\desktop_replace_full_run_33110_to_35568_*.log' | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if($log){ Write-Output ('LATEST_LOG=' + $log.FullName); Get-Content -Tail 120 $log.FullName } else { 'NO_LOG_FILE' }"
+		},
+		{
+			"label": "kg-kill-all-replace-runs-now",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if ($procs) { foreach($p in $procs){ try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop; Write-Output ('STOPPED=' + $p.ProcessId) } catch { Write-Output ('STOP_FAILED=' + $p.ProcessId) } } } else { 'NO_REPLACE_PROCS' }"
+		},
+		{
+			"label": "kg-single-full-apply-verify-33110-35568",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/replace_desktop_tree_component.py --old-id 33110 --new-id 35568 --scan-category --max-pages 40 --apply"
+		},
+		{
+			"label": "kg-check-replace-active-now",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ $procs | Select-Object ProcessId,CommandLine | Format-List | Out-String } else { 'NO_REPLACE_PROCESS_RUNNING' }"
+		},
+		{
+			"label": "kg-stop-all-active-replace-runs",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ foreach($p in $procs){ try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop; Write-Output ('STOPPED=' + $p.ProcessId) } catch { Write-Output ('STOP_FAILED=' + $p.ProcessId) } } } else { 'NO_REPLACE_PROCESS_RUNNING' }"
+		},
+		{
+			"label": "kg-single-full-apply-verify-rerun-fixed",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/replace_desktop_tree_component.py --old-id 33110 --new-id 35568 --scan-category --max-pages 40 --apply"
+		},
+		{
+			"label": "kg-check-active-run-after-fix",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ $procs | Select-Object ProcessId,CommandLine | Format-List | Out-String } else { 'NO_REPLACE_PROCESS_RUNNING' }"
+		},
+		{
+			"label": "kg-hard-stop-all-replace-before-single-run",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ foreach($p in $procs){ try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop; Write-Output ('STOPPED=' + $p.ProcessId) } catch { Write-Output ('STOP_FAILED=' + $p.ProcessId) } } } else { 'NO_REPLACE_PROCESS_RUNNING' }"
+		},
+		{
+			"label": "kg-single-authoritative-apply-verify-run",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/replace_desktop_tree_component.py --old-id 33110 --new-id 35568 --scan-category --max-pages 40 --apply"
+		},
+		{
+			"label": "kg-status-single-authoritative-run",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ 'RUNNING=' + $procs.Count; $procs | Select-Object ProcessId | Format-Table -HideTableHeaders | Out-String } else { 'RUNNING=0' }"
+		},
+		{
+			"label": "kg-stop-replace-before-lockfix",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ foreach($p in $procs){ try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop; Write-Output ('STOPPED=' + $p.ProcessId) } catch { Write-Output ('STOP_FAILED=' + $p.ProcessId) } } } else { 'NO_REPLACE_PROCESS_RUNNING' }"
+		},
+		{
+			"label": "kg-restart-server-after-lock-filter-fix",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 4; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/resolve?query=35568' -Method Get | ConvertTo-Json -Depth 5 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-final-single-apply-verify-33110-35568",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/replace_desktop_tree_component.py --old-id 33110 --new-id 35568 --scan-category --max-pages 40 --apply"
+		},
+		{
+			"label": "kg-check-final-run-progress",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ 'RUNNING=' + $procs.Count; $procs | Select-Object ProcessId | Format-Table -HideTableHeaders | Out-String } else { 'RUNNING=0' }"
+		},
+		{
+			"label": "kg-inspect-duplicate-run-details",
+			"type": "shell",
+			"command": "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' } | Select-Object ProcessId,CreationDate,CommandLine | Sort-Object CreationDate | Format-List | Out-String"
+		},
+		{
+			"label": "kg-inspect-parent-child-for-duplicate-runs",
+			"type": "shell",
+			"command": "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' } | Select-Object ProcessId,ParentProcessId,CreationDate | Format-Table -AutoSize | Out-String"
+		},
+		{
+			"label": "kg-wait-check-run-complete-1",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ 'RUNNING=1' } else { 'RUNNING=0' }"
+		},
+		{
+			"label": "kg-wait-check-run-complete-2",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ 'RUNNING=1' } else { 'RUNNING=0' }"
+		},
+		{
+			"label": "kg-tail-process-run-current-progress",
+			"type": "shell",
+			"command": "if(Test-Path 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\process_run.log'){ Get-Content -Tail 60 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\process_run.log' } else { 'NO_PROCESS_LOG' }"
+		},
+		{
+			"label": "kg-wait-check-run-complete-3",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ 'RUNNING=1' } else { 'RUNNING=0' }"
+		},
+		{
+			"label": "kg-wait-check-run-complete-4",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ 'RUNNING=1'; $procs | Select-Object ProcessId,KernelModeTime,UserModeTime | Format-Table -AutoSize | Out-String } else { 'RUNNING=0' }"
+		},
+		{
+			"label": "kg-stop-any-stale-replace-procs-final",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ foreach($p in $procs){ try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop; Write-Output ('STOPPED=' + $p.ProcessId) } catch { Write-Output ('STOP_FAILED=' + $p.ProcessId) } } } else { 'NO_REPLACE_PROCESS_RUNNING' }"
+		},
+		{
+			"label": "kg-restart-server-after-truthful-status-fix",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 4; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/resolve?query=35568' -Method Get | ConvertTo-Json -Depth 4 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-smoke-apply-status-false-on-load-failure",
+			"type": "shell",
+			"command": "$body = '{\"old_query\":\"33110\",\"new_query\":\"35568\",\"desktop_ids\":[\"30783\"],\"max_pages\":1}'; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/apply' -Method Post -ContentType 'application/json; charset=utf-8' -Body $body | ConvertTo-Json -Depth 8 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-smoke-apply-30783-python",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/smoke_apply_30783.py"
+		},
+		{
+			"label": "kg-full-api-apply-verify-all-desktops",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/full_apply_all_desktops_33110_to_35568.py"
+		},
+		{
+			"label": "kg-read-desktop-replacement-live-logs",
+			"type": "shell",
+			"command": "try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/logs' -Method Get | ConvertTo-Json -Depth 6 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-stop-active-api-replace-run",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' -and $_.CommandLine -match 'replace_desktop_tree_component.py' }; if($procs){ foreach($p in $procs){ try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop; Write-Output ('STOPPED=' + $p.ProcessId) } catch { Write-Output ('STOP_FAILED=' + $p.ProcessId) } } } else { 'NO_REPLACE_PROCESS_RUNNING' }"
+		},
+		{
+			"label": "kg-restart-server-after-eager-load-fix",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 4; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/resolve?query=35568' -Method Get | ConvertTo-Json -Depth 4 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-smoke-apply-5441-after-eager-fix",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/verify_apply_endpoint.py"
+		},
+		{
+			"label": "kg-restart-server-after-driver-stability-fix",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 4; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/resolve?query=35568' -Method Get | ConvertTo-Json -Depth 4 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-smoke-apply-5441-after-driver-fix",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/verify_apply_endpoint.py"
+		},
+		{
+			"label": "kg-restart-server-after-login-hardening",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 4; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/desktop-replacement/resolve?query=35568' -Method Get | ConvertTo-Json -Depth 4 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-smoke-apply-5441-after-login-hardening",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/scratch/verify_apply_endpoint.py"
+		},
+		{
+			"label": "kg-list-python-processes",
+			"type": "shell",
+			"command": "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python|powershell|chrome' } | Select-Object ProcessId,Name,CreationDate,CommandLine | Sort-Object Name,CreationDate | Format-Table -AutoSize | Out-String"
+		},
+		{
+			"label": "kg-check-replace-processes",
+			"type": "shell",
+			"command": "$procs = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'replace_desktop_tree_component.py|full_apply_all_desktops_33110_to_35568.py|verify_apply_endpoint.py|smoke_apply_30783.py' }; if($procs){ $procs | Select-Object ProcessId,ParentProcessId,Name,CreationDate,CommandLine | Sort-Object CreationDate | Format-List | Out-String } else { 'NO_DESKTOP_REPLACE_RELATED_PROCESSES' }"
+		},
+		{
+			"label": "kg-check-port-8000",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if($conn){ $pid = ($conn | Select-Object -First 1).OwningProcess; Write-Output ('LISTENER_PID=' + $pid); Get-Process -Id $pid | Select-Object Id,ProcessName,Path | Format-List | Out-String } else { 'NO_8000_LISTENER' }"
+		},
+		{
+			"label": "kg-clean-stale-automation-processes",
+			"type": "shell",
+			"command": "$killed = @(); $failed = @(); $targets = Get-CimInstance Win32_Process | Where-Object { ($_.Name -eq 'chromedriver.exe') -or ($_.Name -eq 'powershell.exe' -and $_.CommandLine -match 'replace_desktop_tree_component.py|desktop_replace_full_run_33110_to_35568_|full_apply_all_desktops_33110_to_35568.py|verify_apply_endpoint.py|smoke_apply_30783.py') }; foreach($p in $targets){ try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop; $killed += $p } catch { $failed += $p } }; 'KILLED_COUNT=' + $killed.Count; if($killed.Count -gt 0){ $killed | Select-Object ProcessId,Name,CommandLine | Format-Table -AutoSize | Out-String }; 'FAILED_COUNT=' + $failed.Count; if($failed.Count -gt 0){ $failed | Select-Object ProcessId,Name,CommandLine | Format-Table -AutoSize | Out-String }"
+		},
+		{
+			"label": "kg-clean-stale-automation-processes-safe",
+			"type": "shell",
+			"command": "$targets = Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'chromedriver.exe' -or ($_.Name -eq 'powershell.exe' -and $_.CommandLine -match 'replace_desktop_tree_component.py|desktop_replace_full_run_33110_to_35568_|full_apply_all_desktops_33110_to_35568.py|verify_apply_endpoint.py|smoke_apply_30783.py') }; Write-Output ('TARGET_COUNT=' + $targets.Count); foreach($p in $targets){ try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop; Write-Output ('KILLED=' + $p.ProcessId + ' ' + $p.Name) } catch { Write-Output ('FAILED=' + $p.ProcessId + ' ' + $p.Name) } }"
+		},
+		{
+			"label": "kg-verify-current-process-state",
+			"type": "shell",
+			"command": "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'chromedriver|python|powershell' } | Select-Object ProcessId,Name,CreationDate,CommandLine | Sort-Object Name,CreationDate | Format-Table -AutoSize | Out-String"
+		},
+		{
+			"label": "kg-restart-server-after-techno-build",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 4; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/supplier/pricelist/scripts' -Method Get | ConvertTo-Json -Depth 6 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-smoke-techno-analyze",
+			"type": "shell",
+			"command": "Write-Output 'SMOKE_START'; $scripts = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/supplier/pricelist/scripts' -Method Get; $tech = $scripts.scripts | Where-Object { $_.supplier -eq 'טכנו' } | Select-Object -First 1; if (-not $tech) { Write-Output 'TECHNO_SCRIPT_MISSING'; exit 0 }; Write-Output ('TECHNO_PROCESS=' + $tech.process_type + ';ENABLED=' + $tech.process_enabled); $path = 'C:\\סנכרון אתר\\קבצים לטיפול\\Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; if (!(Test-Path $path)) { Write-Output ('FILE_MISSING=' + $path); exit 0 }; $bytes = [System.IO.File]::ReadAllBytes($path); $b64 = [Convert]::ToBase64String($bytes); $bodyObj = @{ file_name = 'Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; file_content_b64 = ('data:application/vnd.ms-excel.sheet.macroEnabled.12;base64,' + $b64); supplier_name = 'טכנו'; include_oscn_check = $false; mappings = @{ supplier_sku='A'; title='B'; price='C'; stock='D' } }; $jsonBody = $bodyObj | ConvertTo-Json -Depth 10 -Compress; Write-Output ('BODY_LEN=' + $jsonBody.Length); try { $resp = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/supplier/analyze' -Method Post -ContentType 'application/json; charset=utf-8' -Body $jsonBody; Write-Output 'ANALYZE_OK'; $resp | ConvertTo-Json -Depth 6 } catch { Write-Output 'ANALYZE_ERROR'; if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-check-techno-file-header",
+			"type": "shell",
+			"command": "$path='C:\\סנכרון אתר\\קבצים לטיפול\\Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; if (!(Test-Path $path)) { Write-Output 'MISSING'; exit 0 }; $bytes=[System.IO.File]::ReadAllBytes($path); $head=($bytes[0..7] | ForEach-Object { $_.ToString('X2') }) -join ' '; Write-Output ('HEADER=' + $head); Write-Output ('SIZE=' + $bytes.Length);"
+		},
+		{
+			"label": "kg-install-xlrd",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe -m pip install xlrd==2.0.1"
+		},
+		{
+			"label": "kg-restart-server-post-xlrd",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 4; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/supplier/pricelist/scripts' -Method Get | ConvertTo-Json -Depth 4"
+		},
+		{
+			"label": "kg-smoke-techno-analyze-after-xlrd",
+			"type": "shell",
+			"command": "Write-Output 'SMOKE_START'; $path = 'C:\\סנכרון אתר\\קבצים לטיפול\\Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; if (!(Test-Path $path)) { Write-Output ('FILE_MISSING=' + $path); exit 0 }; $bytes = [System.IO.File]::ReadAllBytes($path); $b64 = [Convert]::ToBase64String($bytes); $bodyObj = @{ file_name = 'Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; file_content_b64 = ('data:application/vnd.ms-excel.sheet.macroEnabled.12;base64,' + $b64); supplier_name = 'טכנו'; include_oscn_check = $false; mappings = @{ supplier_sku='A'; title='B'; price='C'; stock='D' } }; $jsonBody = $bodyObj | ConvertTo-Json -Depth 10 -Compress; try { $resp = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/supplier/analyze' -Method Post -ContentType 'application/json; charset=utf-8' -Body $jsonBody; Write-Output 'ANALYZE_OK'; $resp | Select-Object success, total_rows, rows_with_supplier_sku, rows_with_valid_price, rows_with_stock, extraction_summary | ConvertTo-Json -Depth 8 } catch { Write-Output 'ANALYZE_ERROR'; if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-install-xlrd-server-venv",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/king_games_product_manager/.venv/Scripts/python.exe -m pip install xlrd==2.0.1"
+		},
+		{
+			"label": "kg-restart-server-after-xlrd-server-venv",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 4; Write-Output 'SERVER_RESTARTED'"
+		},
+		{
+			"label": "kg-install-xlrd-system-python",
+			"type": "shell",
+			"command": "python -m pip install xlrd==2.0.1"
+		},
+		{
+			"label": "kg-restart-and-smoke-techno-final",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 5; Write-Output 'SMOKE_START'; $path = 'C:\\סנכרון אתר\\קבצים לטיפול\\Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; if (!(Test-Path $path)) { Write-Output ('FILE_MISSING=' + $path); exit 0 }; $bytes = [System.IO.File]::ReadAllBytes($path); $b64 = [Convert]::ToBase64String($bytes); $bodyObj = @{ file_name = 'Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; file_content_b64 = ('data:application/vnd.ms-excel.sheet.macroEnabled.12;base64,' + $b64); supplier_name = 'טכנו'; include_oscn_check = $false; mappings = @{ supplier_sku='A'; title='B'; price='C'; stock='D' } }; $jsonBody = $bodyObj | ConvertTo-Json -Depth 10 -Compress; try { $resp = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/supplier/analyze' -Method Post -ContentType 'application/json; charset=utf-8' -Body $jsonBody; Write-Output 'ANALYZE_OK'; $resp | Select-Object success, total_rows, rows_with_supplier_sku, rows_with_valid_price, rows_with_stock, extraction_summary | ConvertTo-Json -Depth 8 } catch { Write-Output 'ANALYZE_ERROR'; if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-install-olefile",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe -m pip install olefile"
+		},
+		{
+			"label": "kg-inspect-techno-ole",
+			"type": "shell",
+			"command": "$tmp='C:\\Projects\\KINGGAMES\\king_games_product_manager\\_inspect_techno_ole.py'; @'\nimport olefile\npath = r\"C:\\סנכרון אתר\\קבצים לטיפול\\Techno-Rezef Reseller Pricelist - JUNE2026.xlsm\"\nole = olefile.OleFileIO(path)\nprint('STREAMS:')\nfor s in ole.listdir(streams=True, storages=False):\n    print('/'.join(s))\nprint('ROOT_ENTRIES:', len(ole.listdir()))\nole.close()\n'@ | Set-Content -Path $tmp -Encoding UTF8; c:/Projects/KINGGAMES/.venv/Scripts/python.exe $tmp"
+		},
+		{
+			"label": "kg-inspect-techno-ole-oneliner",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe -c \"import olefile; p=r'C:\\\\סנכרון אתר\\\\קבצים לטיפול\\\\Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; o=olefile.OleFileIO(p); print('STREAMS:'); [print('/'.join(s)) for s in o.listdir(streams=True, storages=False)]; print('ROOT_ENTRIES:', len(o.listdir())); o.close()\""
+		},
+		{
+			"label": "kg-run-techno-ole-inspect-script",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/_inspect_techno_ole.py"
+		},
+		{
+			"label": "kg-run-techno-byte-inspect",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/_inspect_techno_bytes.py"
+		},
+		{
+			"label": "kg-smoke-analyze-techno-now",
+			"type": "shell",
+			"command": "$path = 'C:\\סנכרון אתר\\קבצים לטיפול\\Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; $bytes = [System.IO.File]::ReadAllBytes($path); $b64 = [Convert]::ToBase64String($bytes); $bodyObj = @{ file_name = 'Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; file_content_b64 = ('data:application/vnd.ms-excel.sheet.macroEnabled.12;base64,' + $b64); supplier_name = 'טכנו'; include_oscn_check = $false; mappings = @{ supplier_sku='A'; title='B'; price='C'; stock='D' } }; $jsonBody = $bodyObj | ConvertTo-Json -Depth 10 -Compress; try { $resp = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/supplier/analyze' -Method Post -ContentType 'application/json; charset=utf-8' -Body $jsonBody; $resp | Select-Object success,total_rows,rows_with_supplier_sku,rows_with_valid_price,rows_with_stock,extraction_summary | ConvertTo-Json -Depth 8 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-restart-and-smoke-techno-python",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 5; c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/_smoke_techno_api.py"
+		},
+		{
+			"label": "kg-restart-and-smoke-techno-after-rowfix",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 5; c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/_smoke_techno_api.py"
+		},
+		{
+			"label": "kg-install-pyodbc-system",
+			"type": "shell",
+			"command": "python -m pip install pyodbc"
+		},
+		{
+			"label": "kg-install-pyodbc-project-venv",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe -m pip install pyodbc"
+		},
+		{
+			"label": "kg-check-sql-odbc-drivers",
+			"type": "shell",
+			"command": "python -c \"import pyodbc; print(pyodbc.drivers())\""
+		},
+		{
+			"label": "kg-restart-server-after-pyodbc",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 5; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/supplier/pricelist/scripts' -Method Get | ConvertTo-Json -Depth 3"
+		},
+		{
+			"label": "kg-check-odbc-drivers-fixed",
+			"type": "shell",
+			"command": "python -c 'import pyodbc; print(pyodbc.drivers())'"
+		},
+		{
+			"label": "kg-run-sap-smoke-check",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/_sap_smoke_check.py"
+		},
+		{
+			"label": "kg-run-sap-smoke-check-keys",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe -c \"import base64,requests,json; p=r'C:\\\\סנכרון אתר\\\\קבצים לטיפול\\\\Techno-Rezef Reseller Pricelist - JUNE2026.xlsm'; raw=open(p,'rb').read(); b64=base64.b64encode(raw).decode('ascii'); payload={'file_name':'Techno-Rezef Reseller Pricelist - JUNE2026.xlsm','file_content_b64':'data:application/vnd.ms-excel.sheet.macroEnabled.12;base64,'+b64,'supplier_name':'טכנו','include_oscn_check':True,'mappings':{'supplier_sku':'A','title':'B','price':'C','stock':'D'}}; r=requests.post('http://127.0.0.1:8000/api/supplier/analyze',json=payload,timeout=180); print('STATUS',r.status_code); d=r.json(); print('HAS_OSCN', 'oscn_check' in d); print('OSCN', json.dumps(d.get('oscn_check',{}), ensure_ascii=False)[:1000])\""
+		},
+		{
+			"label": "kg-run-sap-smoke-check-oscn",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe c:/Projects/KINGGAMES/king_games_product_manager/_sap_smoke_check.py"
+		},
+		{
+			"label": "kg-restart-and-reset-product-last-sync",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 5; python - <<'PY'\nimport sqlite3\ndb = r'C:\\Projects\\KINGGAMES\\king_games_product_manager\\products.db'\nconn = sqlite3.connect(db)\nc = conn.cursor()\nc.execute(\"PRAGMA table_info(products)\")\ncols = [r[1].lower() for r in c.fetchall()]\nif 'last_sync_at' not in cols:\n    c.execute(\"ALTER TABLE products ADD COLUMN last_sync_at TEXT\")\nc.execute(\"UPDATE products SET last_sync_at = NULL\")\nconn.commit()\nc.execute(\"SELECT COUNT(*) FROM products WHERE last_sync_at IS NOT NULL AND TRIM(last_sync_at) != ''\")\nprint('SYNCED_AFTER_RESET=', c.fetchone()[0])\nconn.close()\nPY\n; try { Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/dashboard/stats' -Method Get | ConvertTo-Json -Depth 4 } catch { if ($_.Exception.Response) { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd() } else { $_.Exception.Message } }"
+		},
+		{
+			"label": "kg-restart-reset-last-sync-and-verify-dashboard",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 5; python -c \"import sqlite3; db=r'C:\\Projects\\KINGGAMES\\king_games_product_manager\\products.db'; conn=sqlite3.connect(db); c=conn.cursor(); c.execute('PRAGMA table_info(products)'); cols=[r[1].lower() for r in c.fetchall()]; (c.execute('ALTER TABLE products ADD COLUMN last_sync_at TEXT') if 'last_sync_at' not in cols else None); c.execute('UPDATE products SET last_sync_at = NULL'); conn.commit(); c.execute(\\\"SELECT COUNT(*) FROM products WHERE last_sync_at IS NOT NULL AND TRIM(last_sync_at) != ''\\\"); print('SYNCED_AFTER_RESET=' + str(c.fetchone()[0])); conn.close()\"; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/dashboard/stats' -Method Get | ConvertTo-Json -Depth 4"
+		},
+		{
+			"label": "kg-reset-last-sync-and-verify-dashboard-v2",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 5; python c:/Projects/KINGGAMES/king_games_product_manager/_reset_last_sync_once.py; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/dashboard/stats' -Method Get | ConvertTo-Json -Depth 4"
+		},
+		{
+			"label": "kg-restart-verify-dashboard-after-mg-rule",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; try { Stop-Process -Id $procId -Force -ErrorAction Stop; Write-Output ('STOPPED_PID=' + $procId) } catch { Write-Output ('STOP_FAILED_PID=' + $procId + ' ' + $_.Exception.Message) } } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Start-Sleep -Seconds 5; Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/dashboard/stats' -Method Get | Select-Object total_products,synced_products,unsynced_products | ConvertTo-Json -Depth 2"
+		},
+		{
+			"label": "kg-verify-dashboard-retry",
+			"type": "shell",
+			"command": "for ($i=0; $i -lt 8; $i++) { try { $resp = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/dashboard/stats' -Method Get -ErrorAction Stop; $resp | Select-Object total_products,synced_products,unsynced_products | ConvertTo-Json -Depth 2; break } catch { if ($i -eq 7) { throw }; Start-Sleep -Seconds 2 } }"
+		},
+		{
+			"label": "kg-check-8000-listener",
+			"type": "shell",
+			"command": "$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $conn | Select-Object LocalAddress,LocalPort,OwningProcess | Format-Table -AutoSize } else { Write-Output 'NO_LISTENER' }"
+		},
+		{
+			"label": "kg-verify-dashboard-after-reset-final",
+			"type": "shell",
+			"command": "Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/dashboard/stats' -Method Get | Select-Object total_products,synced_products,unsynced_products | ConvertTo-Json -Depth 2"
+		}
+	]
+}

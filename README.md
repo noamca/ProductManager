@@ -21,12 +21,26 @@ This folder contains the duplicated automation project for KING-GAMES product op
 4. Parameter/options scraping from CMS and schema mapping updates.
 5. Daily price checks and markdown reports.
 
+## Development Traceability (Live)
+
+From now on, every development request and implementation must be logged here as a new versioned entry with a date:
+
+- Version format: `vYYYYMMDD-XX`
+- Each new change gets its own dated entry
+
+- `LIVE_DEVELOPMENT_HISTORY.md` (human-readable full history)
+- `LIVE_DEVELOPMENT_HISTORY.jsonl` (machine-readable log)
+
+Canonical launcher for the main app:
+
+- `START_MAIN_MANAGER.bat`
+
 ## Quick Start
 
-### 1) Open terminal in project manager folder
+### 1) Open terminal in the project folder
 
 ```powershell
-cd C:\Users\USER\OneDrive\Documents\Projects\Kinggames\king_games_product_manager
+cd C:\Projects\KINGGAMES
 ```
 
 ### 2) (Recommended) Create and activate a virtual environment
@@ -38,27 +52,46 @@ python -m venv .venv
 
 ### 3) Install Python dependencies
 
-This repository does not include a dependency lock file, so install the known required packages:
+Install the required Python packages:
 
 ```powershell
-pip install selenium pillow requests
+pip install -r requirements.txt
 ```
 
-If you run scripts that parse/edit HTML in future, also install:
+If you want to install only the core runtime pieces manually, use:
 
 ```powershell
-pip install beautifulsoup4 lxml
+pip install selenium pillow requests beautifulsoup4 lxml pyodbc google-api-python-client google-auth openpyxl xlrd==2.0.1
 ```
 
-### 4) Run the local dashboard server
+### 4) Run the system
+
+Preferred launcher:
 
 ```powershell
+.\START_MAIN_MANAGER.bat
+```
+
+If you want to run the main app directly from the project manager folder:
+
+```powershell
+cd C:\Projects\KINGGAMES\king_games_product_manager
 python server.py
 ```
 
 Then open:
 
 - `http://127.0.0.1:8000`
+
+### 5) What should be running
+
+For normal operation, the important components are:
+
+- `START_MAIN_MANAGER.bat` to launch the main dashboard/server stack.
+- `king_games_product_manager\server.py` as the local API and UI server.
+- `products.db` as the main SQLite database.
+
+For supplier or price workflows, run the specific script from the same environment only when needed. Examples include `run_price_check.py`, `process_google_prices_update.py`, `process_google_prices_update_clone.py`, `mg_import_runner.py`, and `scrape_cms_parameters.py`.
 
 ## Runtime Components
 

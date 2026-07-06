@@ -3,3 +3,8 @@ Pillow
 requests
 beautifulsoup4
 lxml
+pyodbc
+google-api-python-client
+google-auth
+openpyxl
+xlrd==2.0.1

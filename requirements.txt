@@ -1,4 +1,6 @@
 selenium
+undetected-chromedriver
+setuptools
 Pillow
 requests
 beautifulsoup4

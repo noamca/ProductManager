@@ -36,6 +36,118 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260712-33] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: suppliers table still showed incorrect last ingestion for מור לוי (expected `2026-07-12 14:03:37` from supplier ingestion history).
+- Implementation: aligned `/api/suppliers/contacts` last-ingestion computation with supplier history sources by backfilling intake history and aggregating `MAX(ingestion_date)` across `supplier_intake_history` + grouped live `supplier_intake_analysis_cache` sessions + legacy `supplier_ingestions` (union-all merge), instead of relying only on `supplier_ingestions`; bumped versions to API `0.38` and app `v0.68`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: after restart, `/api/health/version` reports `0.38`; for supplier `מור לוי`, `/api/suppliers/contacts` now returns `last_ingestion_date=2026-07-12 14:03:37`, matching `/api/supplier/ingestions/history` latest row (`49/49/0/0`).
+- Outcome: suppliers table now matches supplier ingestions history for real live intake timestamps.
+
+### [ID: 20260712-32] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: suppliers table still showed non-live fallback data (Benda/Mor-Levi missing ingestion/template/image-integration even though they exist).
+- Implementation: identified stale inline route handler in `GET /api/suppliers/contacts` that bypassed the new live aggregation method; replaced inline fallback block with `self.get_suppliers_contacts()`; bumped runtime versions to API `0.37` and app `v0.67`; restarted server to load latest code.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live API check after restart returned `api_version=0.37`; `/api/suppliers/contacts` now returns real rows for `בנדא` and `מור לוי` with `last_ingestion_date`, `days_since_last_ingestion`, `has_pricelist_template=true`, and `has_image_integration=true`.
+- Outcome: suppliers management table now receives real live data instead of static fallback payload.
+
+### [ID: 20260712-31] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: integrate `helper_scripts/morlevi_site_scrapter.py` into ENRICHER; add supplier-level image-integration indicators for all suppliers; in suppliers-and-contacts table show last-ingestion date with elapsed days, pricelist-template yes/no, and image-extraction yes/no field.
+- Implementation: wired Morlevi extractor into `product_scraper_engine/selenium_fetcher.py` via new `MorleviSupplierFetcher`; hardened Morlevi scraper for import-safe reuse (no import-time execution, URL dedupe, selector fallbacks); updated supplier image scripts configuration and server defaults to mark Morlevi and Banda as integrated with active loader paths; rewrote `/api/suppliers/contacts` aggregation to merge supplier catalog, contact data, latest ingestion date plus `days_since_last_ingestion`, linked pricelist templates, and image-integration status; updated suppliers table UI columns to show requested yes/no fields and last-ingestion elapsed days; bumped versions to API `0.36` and app `v0.66`.
+- Files changed: king_games_product_manager/helper_scripts/morlevi_site_scrapter.py, king_games_product_manager/product_scraper_engine/selenium_fetcher.py, king_games_product_manager/supplier_image_scripts.json, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics clean on all changed files; runtime routing check confirmed `supplier_name='מור לוי'` resolves to `MorleviSupplierFetcher` and `supplier_name='בנדא'` resolves to `BendaSupplierFetcher`.
+- Outcome: Morlevi image extraction is now integrated into ENRICHER, and supplier management now visibly indicates pricelist/image-integration status with ingestion aging in days.
+
+### [ID: 20260712-30] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: connect the provided Banda image extraction script to the ENRICHER component.
+- Implementation: converted `benda_image_scrapter.py` into an import-safe reusable extractor (removed import-time execution, improved gallery selectors, URL normalization, and dedupe); wired it into `product_scraper_engine/selenium_fetcher.py` via a new `BendaSupplierFetcher`; extended `enricher.enrich_single_product` to accept `supplier_name` and route fetcher selection by supplier; passed supplier name from `update_products_batch_2.py` enrichment pipeline so Banda products use the dedicated extractor automatically; bumped runtime versions to API `0.35` and app `v0.65`.
+- Files changed: king_games_product_manager/helper_scripts/image_extractors/benda_image_scrapter.py, king_games_product_manager/product_scraper_engine/selenium_fetcher.py, king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: static diagnostics on all changed files returned no errors; fetcher routing now explicitly maps supplier `בנדא` to the Banda extractor path.
+- Outcome: ENRICHER now has a supplier-specific Banda image source and uses it automatically in local enrichment flow.
+
+### [ID: 20260712-29] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: install `undetected_chromedriver` so the whole project recognizes it.
+- Implementation: configured workspace Python environment (`.venv`), installed `undetected-chromedriver`; import initially failed on Python 3.14 due to missing `distutils`, so installed `setuptools` to restore compatibility; persisted dependencies in `requirements.txt`; bumped runtime versions to API `0.34` and app `v0.64`.
+- Files changed: requirements.txt, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: executed Python snippet in workspace env: `import distutils` and `import undetected_chromedriver as uc` both succeeded (`distutils_ok`, `uc_ok`).
+- Outcome: dependency is now installed and importable from project environment across scripts.
+
+### [ID: 20260712-28] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: investigate why ingestion of product `35641` appears stuck and returns no text.
+- Implementation: diagnosed that `35641` does not exist in local `products.db`; improved `king_games_product_manager/update_products_batch_2.py` local enrichment flow to print explicit selection diagnostics and emit a clear `product_not_found` error with `insert_product_error` when a requested product ID is missing; bumped runtime versions to API `0.33` and app `v0.63`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: DB checks confirmed no row for `mg_id=35641`; rerun `update_products_batch_2.py 35641` now prints `[Local Enrichment] Selected 1 product IDs` and explicit missing-product message; `/api/reports/errors` now returns a `product_not_found` entry for product `35641`.
+- Outcome: issue is not a stuck process; it is a missing local product record, and the system now reports this explicitly in both terminal output and error reports.
+
+### [ID: 20260712-27] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: real user flow still failed with no-match on MG return file `suppliers_missing_sku_2026-07-12_15-13-09.csv`.
+- Implementation: fixed `king_games_product_manager/app.js` MG-return filtering/session flow to use `updated_products` as fallback candidate pool when `new_products` is empty; expected SKUs sent to parser now come from active candidate pool (new else updated); persisted filtered fallback candidates to rebuild-session payload; in `king_games_product_manager/server.py` extended rebuild-session normalization to read `price/stock` from `new_values` fallback for updated-item payloads; bumped versions to API `0.32` and app `v0.62`.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/server.py, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live end-to-end reproduction with real user files succeeded: analyze on `כרטיס פריט.xlsx` produced `new_products=0`, `updated_products=132`; parse on `suppliers_missing_sku_2026-07-12_15-13-09.csv` produced `202` SKUs from column `1`; overlap selected `41` candidates; `/api/supplier/intake/rebuild-session` returned success with `rows=41` and `session_id=20260712_153342_67ad1bbb`.
+- Outcome: MG return intake no longer fails in the exact real scenario where there are no new products and matches exist under updated products.
+
+### [ID: 20260712-26] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: MG-return intake still failed with `לא נמצאה התאמת SKU בין קובץ MG למוצרים החדשים` even though many SKUs were parsed.
+- Implementation: wired context-aware matching: `king_games_product_manager/app.js` now sends `expected_skus` from current intake `new_products` to `/api/supplier/intake/mg-return/parse`; in `king_games_product_manager/server.py` parser now prefers explicit supplier-SKU headers and then disambiguates columns by overlap score against expected SKUs, so it picks the supplier SKU column even when file has multiple SKU-like columns.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: server restarted and `/api/health/version` reports `0.31`; integration test with ambiguous headers (`SKU` + `מק"ט ספק`) plus expected SKUs selected column index `1` and returned supplier SKUs (`BN-AX120/121/122`).
+- Outcome: MG-return matching now uses current intake context and avoids false zero-match errors caused by wrong SKU column selection.
+
+### [ID: 20260712-25] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: fix supplier MG-return intake failure: `לא נשארו מוצרים לשמירה לאחר סינון MG` after selecting return file.
+- Implementation: improved `king_games_product_manager/server.py` MG-return parser to detect supplier SKU column by header aliases and heuristic per-column scoring (instead of fixed fallback to column 1), which prevents false parsing when SKU is in another column; strengthened `king_games_product_manager/app.js` SKU normalization (quotes/whitespace/NBSP removal and numeric `.0` suffix normalization); added a defensive early check in MG-return apply flow to stop with a clear mismatch message if zero SKU matches are found, instead of trying to persist an empty filtered session.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics clean; server restarted and `/api/health/version` now returns `0.30`; regression call to `/api/supplier/intake/mg-return/parse` with a headerless CSV where SKU appears in column 0 now returns `sku_column_index=0` and correct SKU list.
+- Outcome: MG-return selection no longer fails due to wrong SKU-column detection or trivial SKU formatting differences.
+
+### [ID: 20260712-24] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: in Banda intake, when the currency column contains `$` (including partial `$` values), multiply the price by configured USD rate from settings.
+- Implementation: updated mapped intake pricing in `king_games_product_manager/server.py` to convert `raw_price` into local price via USD rate when currency is USD/`$`, before computing final sale price; applied fix in both CSV mapping and Excel mapping pipelines; added shared helpers for currency-aware local price and multiplier; fixed recalculation paths for static text overrides and category-margin overrides to use the same conversion logic; bumped runtime versions to API `0.29` and app `v0.59`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: restarted server and verified `/api/health/version` returns `api_version=0.29`; ran live `/api/supplier/analyze` preprocess with real Banda file `כרטיס פריט.xlsx`; preview contained `36` USD rows (`$` currency). Sampled row check passed: expected `raw_price * usd_rate * (1+vat) * margin` rounded to next 9 => `789`, actual `789`.
+- Outcome: Banda intake now correctly applies USD conversion for `$` currency rows before VAT/margin pricing.
+
+### [ID: 20260712-23] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: fix missing category list in preprocess popup for Banda intake (empty-state shown despite real categories in data).
+- Implementation: in `king_games_product_manager/server.py`, built `extraction_summary` from `normalized_rows` for mapping-based Excel analysis path (no active transform process) and added preprocess payload fallbacks that derive `category_tree` and `unique_brands` from normalized rows when summary is absent; updated runtime versions to API `0.28` and app `v0.58`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live API preprocess on the real Banda file returned non-empty categories (`CATS=156`); browser run with the real file opened popup with `312` category checkboxes and without empty-state text.
+- Outcome: category popup now reliably shows categories for selection/cancelation in Banda intake flow.
+
+### [ID: 20260712-22] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: remove repeated false popup `חובה למפות את עמודת מק"ט ספק!` when mapping is already saved.
+- Implementation: updated `king_games_product_manager/app.js` in analyze flow to fallback to saved tab field mapping (`supplier_sku` or `manufacturer_sku`) before mandatory-SKU validation, so empty form fields no longer block mapped intake flows; bumped frontend to `v0.57` and synced `index.html` version badge.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: no JS/HTML syntax errors; required-SKU check now runs after trying saved mapping fallback.
+- Outcome: mapped suppliers (including Banda) are no longer blocked by false SKU-required alert.
+
+### [ID: 20260712-21] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: fix Banda intake failure when uploading non-CSV file after mapping (UI alert: no automatic conversion process).
+- Implementation: removed frontend hard-stop for binary/non-CSV uploads without active auto-transform; added backend fallback in `king_games_product_manager/server.py` to parse Excel directly from uploaded file using saved tab/field mapping in `/api/supplier/analyze`; added tab-name mismatch fallback (use first sheet with saved mapping) and clearer extraction error when mapping cannot parse rows; bumped versions to API `0.26` and app `v0.56`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: no syntax errors; server restarted successfully and `/api/health/version` reports `0.26`; non-CSV UI block removed.
+- Outcome: Banda intake can proceed through mapping-based Excel path instead of failing immediately on missing auto-process.
+
+### [ID: 20260712-20] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: keep tab/category selections and category multipliers between pricelist scans, and default new categories to unselected.
+- Implementation: updated `king_games_product_manager/app.js` preprocess flow to load tab/category defaults from saved mapping, keep unknown/new tabs/categories unchecked by default, and automatically persist selected and unselected tabs/categories plus category multipliers on every preprocess apply to both supplier field mappings and pricelist input mapping; updated app version to `v0.55` and fallback badge in `index.html`.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: no syntax errors in app.js/index.html; server restarted healthy; persistence logic now saves full toggle state (including false) for next scans.
+- Outcome: future scans retain user decisions, and newly discovered categories/tabs remain disabled until explicitly enabled.
+
 ### [ID: 20260712-19] [Status: completed]
 - Timestamp: 2026-07-12
 - Request: fix missing values in full MG export: column G category, column I SAP SKU, and column AG price-before-discount formula.

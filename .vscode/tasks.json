@@ -815,6 +815,1161 @@
 			"label": "kg-verify-dashboard-after-reset-final",
 			"type": "shell",
 			"command": "Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/dashboard/stats' -Method Get | Select-Object total_products,synced_products,unsynced_products | ConvertTo-Json -Depth 2"
+		},
+		{
+			"label": "kg_restart_server_and_verify_endpoints",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $pid = ($conn | Select-Object -First 1).OwningProcess; Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue; Write-Output ('STOPPED_PID=' + $pid) } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; $ok = $false; for ($i = 0; $i -lt 40; $i++) { try { $h = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/health/version' -Method Get -ErrorAction Stop; if ($h) { $ok = $true; break } } catch {} }; if (-not $ok) { throw 'FAILED_HEALTH_CHECK' }; $c = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/suppliers/catalog' -Method Get; $i = Invoke-RestMethod -Uri ('http://127.0.0.1:8000/api/supplier/pricelist/inspect-sample?supplier_name=' + [uri]::EscapeDataString('טכנו')) -Method Get; [PSCustomObject]@{ api_version = $h.api_version; catalog_count = $c.count; inspect_success = $i.success } | ConvertTo-Json -Depth 3"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "kg_restart_server_and_verify_endpoints",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue; Write-Output ('STOPPED_PID=' + $procId) } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; $ok = $false; for ($i = 0; $i -lt 80; $i++) { try { $h = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/health/version' -Method Get -ErrorAction Stop; if ($h) { $ok = $true; break } } catch {} }; if (-not $ok) { throw 'FAILED_HEALTH_CHECK' }; $c = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/suppliers/catalog' -Method Get; $insp = Invoke-RestMethod -Uri ('http://127.0.0.1:8000/api/supplier/pricelist/inspect-sample?supplier_name=' + [uri]::EscapeDataString('טכנו')) -Method Get; [PSCustomObject]@{ api_version = $h.api_version; catalog_count = $c.count; inspect_success = $insp.success; inspect_tabs = ($insp.tabs | Measure-Object).Count } | ConvertTo-Json -Depth 3"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "kg_restart_server_and_verify_endpoints_v2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue; Write-Output ('STOPPED_PID=' + $procId) } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; $ok = $false; for ($i = 0; $i -lt 80; $i++) { try { $h = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/health/version' -Method Get -ErrorAction Stop; if ($h) { $ok = $true; break } } catch {} }; if (-not $ok) { throw 'FAILED_HEALTH_CHECK' }; $c = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/suppliers/catalog' -Method Get; $insp = Invoke-RestMethod -Uri ('http://127.0.0.1:8000/api/supplier/pricelist/inspect-sample?supplier_name=' + [uri]::EscapeDataString('טכנו')) -Method Get; [PSCustomObject]@{ api_version = $h.api_version; catalog_count = $c.count; inspect_success = $insp.success; inspect_tabs = ($insp.tabs | Measure-Object).Count } | ConvertTo-Json -Depth 3"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "restart-kg-server-no-sleep",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue; Write-Output ('STOPPED_PID=' + $procId) } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Write-Output 'RESTART_DONE'"
+			]
+		},
+		{
+			"label": "restart-kg-server-after-mapping-fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue; Write-Output ('STOPPED_PID:' + $procId) } else { Write-Output 'NO_8000_LISTENER' }; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat'; Write-Output 'RESTART_DONE'"
+			]
+		},
+		{
+			"label": "restart-kg-server-after-mapping-fix-v2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conn) { $procId = ($conn | Select-Object -First 1).OwningProcess; Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue }; Start-Process -FilePath C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat; Write-Host RESTART_DONE"
+			]
+		},
+		{
+			"label": "kg-restart-server-db-mapping",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) { $p = ($c | Select-Object -First 1).OwningProcess; Stop-Process -Id $p -Force -ErrorAction SilentlyContinue }; Start-Process -FilePath C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat; Write-Host RESTARTED"
+			]
+		},
+		{
+			"label": "kg-restart-server-db-mapping-v2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) { $p = ($c | Select-Object -First 1).OwningProcess; Stop-Process -Id $p -Force -ErrorAction SilentlyContinue }; Start-Process -FilePath C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat; Write-Host RESTARTED"
+			]
+		},
+		{
+			"label": "kg-restart-after-ui-intake-fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) { $p = ($c | Select-Object -First 1).OwningProcess; Stop-Process -Id $p -Force -ErrorAction SilentlyContinue }; Start-Process -FilePath C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat; Write-Host RESTARTED"
+			]
+		},
+		{
+			"label": "kg-restart-after-csv-delimiter-fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) { $p = ($c | Select-Object -First 1).OwningProcess; Stop-Process -Id $p -Force -ErrorAction SilentlyContinue }; Start-Process -FilePath C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat; Write-Host RESTARTED"
+			]
+		},
+		{
+			"label": "kill-server-31388",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"31388",
+				"/F"
+			]
+		},
+		{
+			"label": "start-main-manager-bg",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat"
+			]
+		},
+		{
+			"label": "touch-server-py",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"(Get-Item 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py').LastWriteTime = Get-Date; (Get-Item 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py').LastWriteTime.ToString('o')"
+			]
+		},
+		{
+			"label": "touch-server-py-copy",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"copy /b \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\"+,,"
+			]
+		},
+		{
+			"label": "kill-server-18512",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"18512",
+				"/F"
+			]
+		},
+		{
+			"label": "start-main-manager-bg-2",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat"
+			]
+		},
+		{
+			"label": "show-server-mtime",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Item 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py' | Select-Object FullName,LastWriteTime,Length | Format-List"
+			]
+		},
+		{
+			"label": "set-server-mtime-now",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"(Get-Item \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\").LastWriteTime = Get-Date; Get-Item \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\" | Select-Object LastWriteTime | Format-List"
+			]
+		},
+		{
+			"label": "kill-server-364",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"364",
+				"/F"
+			]
+		},
+		{
+			"label": "start-main-manager-bg-3",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat"
+			]
+		},
+		{
+			"label": "delete-server-pyc",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-ChildItem 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\__pycache__' -Filter 'server*.pyc' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue; Get-ChildItem 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\__pycache__' -Filter 'server*.pyc' -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count"
+			]
+		},
+		{
+			"label": "kill-server-19244",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"19244",
+				"/F"
+			]
+		},
+		{
+			"label": "start-main-manager-bg-4",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat"
+			]
+		},
+		{
+			"label": "verify-mg5-export-file",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe",
+			"args": [
+				"-c",
+				"import csv,os,sys; p=r'C:\\TEMP\\SUPPLIER_MG5_טכנו_20260708_112149.csv'; print('EXISTS=',os.path.exists(p)); rows=[]; f=open(p,'r',encoding='cp1255',newline=''); r=csv.reader(f); \nfor i,row in enumerate(r):\n    if i<10: rows.append(row)\n    else: break\nf.close(); print('SAMPLE_ROWS=',len(rows)); print('COL_COUNTS=',[len(x) for x in rows]); print('FOURTH_EMPTY=',[ (len(x)>=4 and (x[3]=='')) for x in rows[:5] ]); print('FIRST_ROW=',rows[0] if rows else [])"
+			]
+		},
+		{
+			"label": "verify-mg5-export-csv-structure",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$p='C:\\TEMP\\SUPPLIER_MG5_טכנו_20260708_112149.csv'; if(!(Test-Path $p)){ Write-Output 'EXISTS=False'; exit 1 }; Add-Type -AssemblyName Microsoft.VisualBasic; $enc=[System.Text.Encoding]::GetEncoding(1255); $txt=[System.IO.File]::ReadAllText($p,$enc); $sr=New-Object System.IO.StringReader($txt); $parser=New-Object Microsoft.VisualBasic.FileIO.TextFieldParser($sr); $parser.SetDelimiters(','); $parser.HasFieldsEnclosedInQuotes=$true; $counts=@(); $empty4=@(); $first=$null; $i=0; while(-not $parser.EndOfData -and $i -lt 10){ $f=$parser.ReadFields(); if($null -eq $first){ $first=$f }; $counts += $f.Length; if($f.Length -ge 4){ $empty4 += ([string]::IsNullOrEmpty($f[3])) } else { $empty4 += $false }; $i++ }; $parser.Close(); Write-Output ('EXISTS=True'); Write-Output ('SAMPLE_ROWS=' + $i); Write-Output ('COL_COUNTS=' + ($counts -join ',')); Write-Output ('FOURTH_EMPTY=' + ($empty4 -join ',')); if($first){ Write-Output ('FIRST_ROW=' + ($first -join '|')) }"
+			]
+		},
+		{
+			"label": "run-verify-mg5-ps1",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\verify_mg5.ps1"
+			]
+		},
+		{
+			"label": "run-verify-mg5-ps1-latest",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\verify_mg5.ps1"
+			]
+		},
+		{
+			"label": "touch-server-app-after-010",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"(Get-Item \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\").LastWriteTime = Get-Date; (Get-Item \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\app.js\").LastWriteTime = Get-Date"
+			]
+		},
+		{
+			"label": "delete-server-pyc-after-010",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-ChildItem 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\__pycache__' -Filter 'server*.pyc' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue"
+			]
+		},
+		{
+			"label": "kill-server-29636",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"29636",
+				"/F"
+			]
+		},
+		{
+			"label": "start-main-manager-bg-5",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat"
+			]
+		},
+		{
+			"label": "verify-latest-mg5-file-after-010",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\verify_mg5.ps1"
+			]
+		},
+		{
+			"label": "show-server-mtime-now2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Item 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py' | Select-Object LastWriteTime | Format-List"
+			]
+		},
+		{
+			"label": "kill-server-21004",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"21004",
+				"/F"
+			]
+		},
+		{
+			"label": "start-main-manager-bg-6",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat"
+			]
+		},
+		{
+			"label": "verify-latest-mg5-file-after-bflag",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\verify_mg5.ps1"
+			]
+		},
+		{
+			"label": "show-server-cmdline-21104",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-CimInstance Win32_Process -Filter \"ProcessId = 21104\" | Select-Object ProcessId,CommandLine | Format-List"
+			]
+		},
+		{
+			"label": "kill-server-21104",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"21104",
+				"/F"
+			]
+		},
+		{
+			"label": "start-server-direct-venv-b",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe' -WorkingDirectory 'C:\\Projects\\KINGGAMES\\king_games_product_manager' -ArgumentList '-B','server.py'"
+			]
+		},
+		{
+			"label": "run-start-server-direct-ps1",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\start_server_direct.ps1"
+			]
+		},
+		{
+			"label": "verify-latest-mg5-final",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\verify_mg5.ps1"
+			]
+		},
+		{
+			"label": "kill-server-30148",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"30148",
+				"/F"
+			]
+		},
+		{
+			"label": "set-server-mtime-100",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"(Get-Item \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\").LastWriteTime = Get-Date; (Get-Item \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\").LastWriteTime.ToString(\"o\")"
+			]
+		},
+		{
+			"label": "start-main-manager-after-kill",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"C:\\Projects\\KINGGAMES\\START_MAIN_MANAGER.bat"
+			]
+		},
+		{
+			"label": "inspect-server-pid-cmdline",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "inspect-server-pid-cmdline-2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "inspect-server-pid-cmdline-3",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "kill-server-25580",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"25580",
+				"/F"
+			]
+		},
+		{
+			"label": "start-server-explicit-b",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"/D",
+				"C:\\Projects\\KINGGAMES\\king_games_product_manager",
+				"C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe",
+				"-B",
+				"server.py"
+			]
+		},
+		{
+			"label": "inspect-server-pid-cmdline-4",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "kill-server-28392",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"28392",
+				"/F"
+			]
+		},
+		{
+			"label": "start-server-explicit-b-2",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"/D",
+				"C:\\Projects\\KINGGAMES\\king_games_product_manager",
+				"C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe",
+				"-B",
+				"server.py"
+			]
+		},
+		{
+			"label": "inspect-server-pid-cmdline-5",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "kill-server-33264",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"33264",
+				"/F"
+			]
+		},
+		{
+			"label": "start-server-explicit-b-3",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"/D",
+				"C:\\Projects\\KINGGAMES\\king_games_product_manager",
+				"C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe",
+				"-B",
+				"server.py"
+			]
+		},
+		{
+			"label": "inspect-server-pid-cmdline-6",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "inspect-pid-before-restart",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "kill-current-server-by-health",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$h=Invoke-RestMethod -Uri ('http://127.0.0.1:8000/api/health/version?ts=' + [int](Get-Date -UFormat %s)); if($h.pid){taskkill /PID $h.pid /F; Write-Output ('KILLED=' + $h.pid)} else {Write-Output 'NO_PID'}"
+			]
+		},
+		{
+			"label": "kill-server-18144",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"18144",
+				"/F"
+			]
+		},
+		{
+			"label": "start-server-explicit-b-post-clear",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"/D",
+				"C:\\Projects\\KINGGAMES\\king_games_product_manager",
+				"C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe",
+				"-B",
+				"server.py"
+			]
+		},
+		{
+			"label": "inspect-pid-after-restart",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "post-sheets-sync-check-response",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$today = Get-Date -Format yyyy-MM-dd; $body = @{ date_from=$today; date_to=$today; spreadsheet_id='13LS71yd1lhxDjO2c9E9e1bCS3Q8M-Wvx7K7mh-ARY6I'; clear_before_update=$true; clear_range='DATA!B7:G21' } | ConvertTo-Json; (Invoke-WebRequest -Uri 'http://127.0.0.1:8000/api/sap/sales-report/sheets-sync' -Method POST -ContentType 'application/json' -Body $body).Content"
+			]
+		},
+		{
+			"label": "check-server-mtime",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"(Get-Item 'C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py').LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss.fffffff')"
+			]
+		},
+		{
+			"label": "restart-server-for-pricelists-refactor",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$h=Invoke-RestMethod -Uri ('http://127.0.0.1:8000/api/health/version?ts=' + [int](Get-Date -UFormat %s)); if($h.pid){taskkill /PID $h.pid /F}; cmd /c start \"\" /D C:\\Projects\\KINGGAMES\\king_games_product_manager C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py; Write-Output 'RESTARTED'"
+			]
+		},
+		{
+			"label": "inspect-server-pid-after-pricelist-refactor",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "kill-server-23976-explicit",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"23976",
+				"/F"
+			]
+		},
+		{
+			"label": "start-server-explicit-for-pricelists",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"/D",
+				"C:\\Projects\\KINGGAMES\\king_games_product_manager",
+				"C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe",
+				"-B",
+				"server.py"
+			]
+		},
+		{
+			"label": "inspect-pid-after-explicit-restart-pricelists",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "check-server-file-mtime-now",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Item \"C:\\Projects\\KINGGAMES\\king_games_product_manager\\server.py\" | Select-Object FullName,LastWriteTime | Format-List"
+			]
+		},
+		{
+			"label": "restart-server-after-pricelists-fallback-fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Process python -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*KINGGAMES*' } | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe' -ArgumentList '-B','server.py' -WorkingDirectory 'C:\\Projects\\KINGGAMES\\king_games_product_manager'"
+			]
+		},
+		{
+			"label": "inspect-pid-current",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "smoke-pricelists-terminal",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$u='http://127.0.0.1:8000/api/pricelists?ts=' + [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds(); try { $r=Invoke-WebRequest -UseBasicParsing -Uri $u -TimeoutSec 10; Write-Output ('STATUS=' + [int]$r.StatusCode); Write-Output $r.Content } catch { if ($_.Exception.Response) { $resp=$_.Exception.Response; Write-Output ('STATUS=' + [int]$resp.StatusCode.value__); $sr=New-Object IO.StreamReader($resp.GetResponseStream()); $body=$sr.ReadToEnd(); $sr.Close(); Write-Output $body } else { Write-Output ('ERR=' + $_.Exception.Message) } }"
+			]
+		},
+		{
+			"label": "curl-pricelists-smoke",
+			"type": "shell",
+			"command": "curl.exe",
+			"args": [
+				"-i",
+				"http://127.0.0.1:8000/api/pricelists"
+			]
+		},
+		{
+			"label": "kill-current-server-pid-13116",
+			"type": "shell",
+			"command": "taskkill",
+			"args": [
+				"/PID",
+				"13116",
+				"/F"
+			]
+		},
+		{
+			"label": "start-server-after-hard-kill",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"start",
+				"",
+				"/D",
+				"C:\\Projects\\KINGGAMES\\king_games_product_manager",
+				"C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe",
+				"-B",
+				"server.py"
+			]
+		},
+		{
+			"label": "inspect-pid-after-hard-kill-restart",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "curl-pricelists-after-hard-restart",
+			"type": "shell",
+			"command": "curl.exe",
+			"args": [
+				"-i",
+				"http://127.0.0.1:8000/api/pricelists"
+			]
+		},
+		{
+			"label": "restart-after-debug-unknown-route",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$h=Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/health/version' -TimeoutSec 5; taskkill /PID $h.pid /F | Out-Null; cmd /c start \"\" /D C:\\Projects\\KINGGAMES\\king_games_product_manager C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			]
+		},
+		{
+			"label": "curl-pricelists-debug-unknown-route",
+			"type": "shell",
+			"command": "curl.exe",
+			"args": [
+				"-i",
+				"http://127.0.0.1:8000/api/pricelists"
+			]
+		},
+		{
+			"label": "inspect-pid-before-final-hard-restart",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "hard-restart-kill-by-image-then-start",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"taskkill /IM python.exe /F & start \"\" /D C:\\Projects\\KINGGAMES\\king_games_product_manager C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			]
+		},
+		{
+			"label": "inspect-pid-after-killall-start",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "curl-pricelists-after-killall-start",
+			"type": "shell",
+			"command": "curl.exe",
+			"args": [
+				"-i",
+				"http://127.0.0.1:8000/api/pricelists"
+			]
+		},
+		{
+			"label": "restart-server-after-cleanup-debug-msg",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "kill-and-restart-final",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"taskkill /PID 15992 /F & start \"\" /D C:\\Projects\\KINGGAMES\\king_games_product_manager C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			]
+		},
+		{
+			"label": "verify-final-pid-post-restart",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Projects\\KINGGAMES\\scratch\\inspect_server_pid.ps1"
+			]
+		},
+		{
+			"label": "curl-pricelists-by-supplier",
+			"type": "shell",
+			"command": "curl.exe",
+			"args": [
+				"-i",
+				"http://127.0.0.1:8000/api/pricelists/by-supplier?supplier=%D7%98%D7%9B%D7%A0%D7%95"
+			]
+		},
+		{
+			"label": "restart-kg-server-clean",
+			"type": "shell",
+			"command": "C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-B",
+				"server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-clean-2",
+			"type": "shell",
+			"command": "Set-Location king_games_product_manager; C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-B",
+				"server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-clean-3",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-suppliers-readonly",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-suppliers-fallback",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-suppliers-fileonly",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-suppliers-filejson",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-suppliers-fileonly2",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-suppliers-fileonly3",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-suppliers-final",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-suppliers-final-2",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-root-server-suppliers-fix",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location .; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "hard-restart-kg-server-suppliers",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$p = Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if ($p) { Stop-Process -Id $p -Force }; Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "kill-pid-22192-and-start-kg",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Stop-Process -Id 22192 -Force; Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-suppliers-inline-route",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Stop-Process -Id 17964 -Force; Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "restart-kg-server-after-fallback",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Stop-Process -Id 17072 -Force; Set-Location king_games_product_manager; & C:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B server.py"
+			],
+			"isBackground": true,
+			"group": "build"
 		}
 	]
 }

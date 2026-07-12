@@ -36,6 +36,14 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260712-19] [Status: completed]
+- Timestamp: 2026-07-12
+- Request: fix missing values in full MG export: column G category, column I SAP SKU, and column AG price-before-discount formula.
+- Implementation: in `king_games_product_manager/server.py` updated intake full-MG export mapping to always set column G from `category_code` (default `400`), fill column I from cache with fallback to `products.sap_sku` by supplier SKU and live SAP ODBC lookup (`OITM.SuppCatNum -> ItemCode`), and compute AG as `(sale_price * 1.1)` rounded to nearest number ending with `9`; bumped backend API to `0.25` and frontend app to `v0.54`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live `POST /api/supplier/intake/export-mg-full` returned 200; inspected generated CSV and verified example rows include `G=400`, `I=208369/208370/208380`, and calculated `AG=3179` for `AH=2890`.
+- Outcome: full MG export now includes required category/SAP values and AG follows requested pricing rule.
+
 ### [ID: 20260712-18] [Status: completed]
 - Timestamp: 2026-07-12
 - Request: full MG export still failed with `לא נמצאו מוצרים תקינים לייצוא מלא ל-MG`.

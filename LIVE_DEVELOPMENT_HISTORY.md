@@ -36,6 +36,54 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260713-16] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: in supplier ingestions history screen, add a summary table above the existing table that shows only one row per supplier, selecting the latest ingestion closest to now, with exactly the same columns as current table.
+- Implementation: in `index.html` added new summary table `ingestionsLatestBySupplierTable` above `ingestionsHistoryTable` with identical column schema; in `app.js` enhanced `fetchIngestionsHistory()` to compute latest row per supplier (by `ingestion_date` max timestamp), render summary and full-history tables from shared row renderer, and keep file-view buttons/actions identical in both tables; updated status text to display both total rows and unique suppliers count; bumped app version to `v0.82` and updated cache-busting querystrings in `index.html`.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics check returned no errors in changed frontend files; loading states, empty states, and error states now apply to both summary and full-history tables.
+- Outcome: user now gets an immediate top-level "last ingestion per supplier" view before the full chronological history table.
+
+### [ID: 20260713-15] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: fix live ישפאר mismatch where SKU pricing still used multiplier (e.g. `699` became `1079`) and ensure override controls are applied in the active mapping flow.
+- Implementation: added missing raw-price override controls and persistence wiring to managed pricelist mapping editor in `app.js` (`price_use_raw_no_margin`, `price_fixed_delta`); added UI guardrail in supplier mapping save flow to auto-apply ישפאר defaults (`raw_no_margin=true`, `fixed_delta=-10`) when both options are unset; added backend runtime guardrail in `server.py` (`_apply_supplier_price_defaults`) so ישפאר still gets required defaults even if stale mapping data is saved; bumped runtime versions to API `0.51` and app `v0.81` and updated cache-busting in `index.html`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live API checks confirmed no syntax problems in changed files; verified supplier mapping endpoint still reachable; verified `COUNT=0` managed-pricelist links for ישפאר (supplier-level mapping path is active); verified version bump paths updated in UI/API.
+- Outcome: ישפאר intake pricing is now protected by both UI+backend defaults, preventing silent fallback to multiplier pricing when override fields are missing.
+
+### [ID: 20260713-14] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: for exceptional supplier (`ישפאר`), add intake pricing controls on the `מחיר` mapping field: (1) use raw read price without sale-price multiplier, and (2) add/subtract fixed amount (including negative values).
+- Implementation: in `app.js` supplier mapping UI, added under `raw_price` field two new controls: checkbox `השתמש במחיר כפי שנקרא ללא חישוב מחיר מכירה` and checkbox+text `הוסף או הפחת מהמחיר קבוע` with signed value support; in `server.py` extended tab mapping normalization with `price_use_raw_no_margin` and `price_fixed_delta`; implemented `_resolve_pricing_with_tab_options` that applies fixed delta before pricing and, when raw-no-margin is enabled, sets final price to adjusted raw price with multiplier `1.0`; integrated this logic into CSV intake normalization, Excel intake normalization, and static-text normalization path for consistency.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live endpoint test (`/api/supplier/analyze`) with sample row `price=699` and options `raw_no_margin=true`, `fixed_delta=-10` returned `raw_price=689.0`, `final_price=689.0`, `price_multiplier=1.0`, `pricing_source=raw_no_margin_override`.
+- Outcome: exceptional supplier price handling now works exactly as requested: fixed +/- adjustment can be applied globally and optional bypass of sale-price multiplier is supported.
+
+### [ID: 20260713-13] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: restore missing mapping controls in supplier contact modal and fix ישפאר pricelist combo not updating.
+- Implementation: restored full supplier modal mapping controls in `app.js` under contact/supplier edit: per-field column combo selector + `טקסט קבוע` + `מה לחפש`; upgraded supplier sample-inspection response in `server.py` to include per-tab `column_headers` (CSV/Excel first row) and preserve them when merging existing mappings; added import pricelist combo fallback in `app.js` so when no linked managed pricelist exists but supplier-level mapping exists, combo now shows `מיפוי ספק שמור` instead of dead-end empty state; refreshed combo after fallback mapping load; bumped versions to API `0.49` and app `v0.79`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live health check reports `api_version=0.49`; `/api/pricelists` contains supplier option for `ישפאר`; `/api/supplier/pricelist/field-mappings?supplier=ישפאר` returns tabs.
+- Outcome: supplier contact modal is back to the expected mapping UX, and selecting ישפאר no longer leaves the pricelist combo unusable.
+
+### [ID: 20260713-12] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: fix two supplier-pricelist regressions: (1) managed pricelist mapping lost rich column-combo behavior, and (2) Yeshpar showed `0` pricelists and blocked intake despite saved mapping.
+- Implementation: in `app.js`, replaced strict supplier-name equality with normalized related-key matching for intake supplier->pricelist resolution; added supplier-level mapping fallback load (`/api/supplier/pricelist/field-mappings`) when no linked managed pricelist is selected; removed hard frontend block on missing `pricelist_id` when a saved supplier mapping exists, so analyze/preprocess can continue; improved intake hint text for fallback mode. In `server.py`, enhanced `/api/pricelists/inspect-sample` to extract and return per-tab `column_headers` (CSV and Excel first-row headers), preserved `column_headers` through mapping normalization, and adjusted `/api/pricelists` supplier counts to include saved supplier mapping fallback (avoids false `0`). In mapping modal (`app.js`), restored rich combo options as `A - header` plus header choices.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live checks passed: `/api/pricelists` now returns `ישפאר` with `pricelists_count=1`; `/api/supplier/pricelist/field-mappings?supplier=ישפאר` returns `tabs=1`; controlled `/api/pricelists/inspect-sample` CSV probe returns `column_headers=sku|title|price`; diagnostics report no errors in changed files.
+- Outcome: supplier intake is no longer blocked by false zero-linked-pricelist state, and managed pricelist mapping combo experience is restored with column-header-aware selection.
+
+### [ID: 20260713-11] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: price comparison reports page (`דוחות השוואת מחירים`) showed empty view with error loading reports list.
+- Implementation: fixed missing GET routing in `king_games_product_manager/server.py` by adding `/api/reports` -> `get_reports()` and `/api/reports/detail` -> `get_report_detail(query)`; performed hard restart to remove stale `python -B server.py` processes and load updated routes; bumped versions to API `0.47` and app `v0.77` in `server.py`, `app.js`, and `index.html` cache-busting URLs.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live API checks passed: `/api/reports` returns HTTP 200 with report rows, `/api/reports/detail?filename=...` returns report content (`DETAIL_OK`), and `/api/health/version` returns `api_version=0.47`.
+- Outcome: reports screen now loads the reports list and report details correctly.
+
 ### [ID: 20260713-10] [Status: completed]
 - Timestamp: 2026-07-13
 - Request: power outage happened and work needed to continue from the same point as 5 minutes earlier.

@@ -36,6 +36,14 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260713-20] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: finalize and push improved release that includes pricelist-intake improvements and product-improvement-agent integration, plus resolve visibility issues for recommendation button in product drawer.
+- Implementation: packaged release `v0.86` with cache-busting bump in frontend assets; fixed product-agent dashboard start-button runtime bug by moving URL helper functions out of nested scope in `app.js`; strengthened product recommendation UX visibility by adding recommendation actions in three visible positions in product drawer (header, inline in basic tab, footer) with unified enable/disable behavior and shared modal action.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics check returned no errors in changed JS/HTML files; browser validation confirmed recommendation buttons are visible and clickable in drawer and dashboard product-agent start action transitions to running state.
+- Outcome: release is ready for GitHub push with working product-agent launch flow and clearly visible recommendation access in product cards.
+
 ### [ID: 20260713-19] [Status: completed]
 - Timestamp: 2026-07-13
 - Request: persist PrdFineTuningAgent output JSON into DB continuously, handle partial files safely, expose product-level recommendation view, and register daily process at 07:00.

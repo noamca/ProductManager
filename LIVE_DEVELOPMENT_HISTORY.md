@@ -36,6 +36,86 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260713-10] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: power outage happened and work needed to continue from the same point as 5 minutes earlier.
+- Implementation: recovered latest context from live history files, restarted canonical app server from `king_games_product_manager` using project `.venv` (`python -B server.py`), and validated that the latest pricing-management runtime state is loaded.
+- Files changed: LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: health endpoint `http://127.0.0.1:8000/api/health/version` returned `api_version=0.46` with active PID; pricing endpoint `/api/pricing/rules` returned success and active rules payload (`selection_mode=lowest_wins`).
+- Outcome: project resumed from the latest state and runtime was fully restored after the outage.
+
+### [ID: 20260713-09] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: create a convenient pricing management UI for `profitPercentsPerCategory.json` under pricelist management (menu entry name: `ניהול תמכורים`), use this table during pricing (including brand-specific monitor rules like GIGABYTE vs DELL for Mor-Levi), optionally combined with legacy pricing where the cheaper result wins, and log the final multiplier source during pricing.
+- Implementation: added new suppliers submenu entry and dedicated view panel `pricingRulesView` (`ניהול תמכורים`) in `index.html`; implemented frontend editor in `app.js` for selection mode + category-tier rows + `small_items` rows with load/save/add/remove actions; added backend pricing rules API (`GET /api/pricing/rules`, `POST /api/pricing/rules/update`) in `server.py`; implemented unified pricing resolver in `server.py` that loads `profitPercentsPerCategory.json`, evaluates category tiers and `small_items`, combines with legacy fallback, supports selection modes (default `lowest_wins`), and stores per-row trace fields (`pricing_source`, `pricing_source_detail`, `price_multiplier`); connected resolver into CSV/Excel/Techno intake normalization paths and category-override path; added process log entries summarizing pricing-source distribution plus sample row traces per analysis run; bumped versions to API `0.46` and app `v0.76`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics reported no errors in changed files; live health check returned `api_version=0.46`; live API checks passed for `/api/pricing/rules` and `/api/supplier/analyze`; sample analysis with category/brand pricing produced source trace rows (`pricing_table_category`) and process log now contains `[Pricing]` source-trace lines.
+- Outcome: pricing can now be managed from UI under `ניהול תמכורים`, pricing decisions are based on table rules (with configurable combined mode where cheaper wins), and system logs show where each final multiplier came from.
+
+### [ID: 20260713-08] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: mark Amtel as having image integration in suppliers table, and copy external script `C:\Projects\KINGGAMES\amtel_scrapter.py` into project (Git-tracked) while removing print/demo lines (76-79).
+- Implementation: added committed extractor file under `king_games_product_manager/helper_scripts/image_extractors/amtel_scrapter.py` with no print/demo execution block; enabled Amtel image integration in `supplier_image_scripts.json` (`has_image_extractor=true`, `use_enabled=true`, loader path set to new script); aligned backend defaults in `_default_supplier_image_scripts` with the same Amtel loader path and enabled flags; bumped versions to API `0.45` and app `v0.75`.
+- Files changed: king_games_product_manager/helper_scripts/image_extractors/amtel_scrapter.py, king_games_product_manager/supplier_image_scripts.json, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics check returned no errors for changed files.
+- Outcome: Amtel now appears as image-integrated in suppliers management, and the extractor script is tracked under project Git path without print/demo tail.
+
+### [ID: 20260713-07] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: dashboard cube 6 still showed same list despite latest fixes.
+- Implementation: diagnosed runtime mismatch (UI loaded new static version but backend process still served old API logic); verified `/api/health/version` was `0.38`, then performed clean server restart from `king_games_product_manager` with project `.venv` interpreter and confirmed API upgraded to `0.44`.
+- Files changed: LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: live API check after restart showed `api_version=0.44`; `/api/dashboard/stats` now returns `DUE_BANDA_MOR=[]` (Banda/Mor-Levi no longer listed as never-ingested in cube 6 due list).
+- Outcome: issue was stale running server process; after restart cube 6 reflects updated backend logic.
+
+### [ID: 20260713-06] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: dashboard cube 6 still showed suppliers as never-ingested, while Banda/Mor-Levi were ingested yesterday.
+- Implementation: fixed `get_dashboard_stats` supplier-key matching to use `_normalize_supplier_lookup_key` (instead of plain `casefold`) for both managed contacts and merged ingestion map; added alias fallback matching by normalized containment (e.g. `בנדא מגנטיק` ↔ `בנדא`) to resolve latest ingestion date when exact key differs; bumped versions to API `0.44` and app `v0.74`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics check on `server.py` returned no errors; DB inspection showed latest real ingestions exist for `בנדא` and `מור לוי` on 2026-07-12.
+- Outcome: cube 6 no longer misses ingestions due to supplier naming variants.
+
+### [ID: 20260713-05] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: dashboard tile `6. מחירונים שדורשים קליטה` was not based on latest real ingestion data and looked like a generic supplier list.
+- Implementation: fixed `get_dashboard_stats` to source due-pricelist rows from managed `supplier_contacts` only (not unified supplier catalog), and compute latest ingestion from merged real history sources (`supplier_intake_history` + grouped live `supplier_intake_analysis_cache` sessions + legacy `supplier_ingestions`) after backfill; due logic now respects each supplier `interval_days` (not hardcoded 14) and sorts by staleness; bumped versions to API `0.43` and app `v0.73`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics check on `server.py` returned no errors.
+- Outcome: dashboard cube 6 now reflects real latest ingestion state from system data instead of showing a broad non-managed supplier list.
+
+### [ID: 20260713-04] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: when product is skipped because supplier images are missing (with skip flag enabled), add a clear note both in MG card comments and local DB comments; disable poor Google/Bing image engines and keep only reliable supplier/direct image sources.
+- Implementation: in `update_products_batch_2.py` added skip-note helpers to append once into local DB comments (`product_attributes.comments_internal` + `products.extra_info.comments_val`) and MG card `comments_internal`; moved missing-image skip handling earlier in CMS flow and on skip now writes diagnostics + updates MG/local comments before returning skipped; removed practical Google fallback path from CMS update by policy; in `product_scraper_engine/enricher.py` removed Bing/guess fallback behavior and now keeps only verified supplier/direct fetcher images; in `product_scraper_engine/selenium_fetcher.py` disabled generic Bing-based manufacturer fetcher selection (returns `None` unless explicit supplier/asus fetcher exists); bumped versions to API `0.42` and app `v0.72`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/product_scraper_engine/selenium_fetcher.py, king_games_product_manager/app.js, king_games_product_manager/server.py, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics check on changed backend files returned no errors (`update_products_batch_2.py`, `enricher.py`, `selenium_fetcher.py`).
+- Outcome: products skipped for missing supplier images now get explicit skip notes in MG/local comments, and guess-based Google/Bing image fallbacks are disabled.
+
+### [ID: 20260713-03] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: rename ingestion flags section headers to `אפשרויות תיאורים ותמונות` and `אפשרויות עדכון במערכת MG`, and move `דלג אם אין תמונות לספק` directly under `שימוש במנוע חיפוש תמונות`.
+- Implementation: updated ingestion console labels and reordered the `ingFlagSkipNoSupplierImages` checkbox position in `index.html`; bumped versions to API `0.41` and app `v0.71`.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics check on `index.html`, `app.js`, and `server.py` returned no errors.
+- Outcome: section titles and checkbox order now match the requested wording and placement.
+
+### [ID: 20260713-02] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: update ingestion console checkbox labels to new Hebrew wording for AI completion, image search engine usage, MG online publish mode, sync update, unlimited quantity update, and valid flag update.
+- Implementation: replaced only UI text labels in ingestion console flags section (`index.html`) without changing runtime logic/IDs; bumped versions to API `0.40` and app `v0.70`.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics check on `index.html` returned no errors.
+- Outcome: ingestion console now displays the requested Hebrew labels exactly.
+
+### [ID: 20260713-01] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: add a new ingestion runtime parameter `דלג אם אין תמונות לספק` so products with no supplier images are skipped and not uploaded to site, with explicit reason in logs.
+- Implementation: added new ingestion runtime flag flow end-to-end (`UI -> API -> runner`) using `skip_if_no_supplier_images` / `--skip-if-no-supplier-images`; in `update_product_on_cms` added missing-image skip gate that, when enabled, writes explicit skip reason to logs, records `missing_images` + `skipped_missing_supplier_images` in `product_errors`, and returns skip status; in publish pipeline the returned skip status now routes the product to `skipped_list` and prevents CMS save + DB sync for that product; bumped versions to API `0.39` and app `v0.69`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics check on changed files returned no errors (`update_products_batch_2.py`, `server.py`, `app.js`, `index.html`).
+- Outcome: when the new checkbox is enabled and no supplier images are available, the product is skipped from upload and skip cause is logged explicitly.
+
 ### [ID: 20260712-33] [Status: completed]
 - Timestamp: 2026-07-12
 - Request: suppliers table still showed incorrect last ingestion for מור לוי (expected `2026-07-12 14:03:37` from supplier ingestion history).

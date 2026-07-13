@@ -36,6 +36,22 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260713-18] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: fix issue where cube-4 dashboard "הפעל" button appears not to start the new PrdFineTuningAgent.
+- Implementation: diagnosed runtime blocker (existing `product-agent` process already running, which correctly blocks a second start); stopped blocking process; strengthened cube-4 UX by adding dedicated stop button (`dashProductAgentStopBtn`), explicit inline start-error feedback in cube status line, and run/stop button state toggling via `setProductAgentUI`; bumped frontend app/assets version to `v0.84`.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: API smoke test passed: start returned success, status changed to `process_type=product-agent` and `is_running=true`, stop call returned success and status returned to `is_running=false`.
+- Outcome: start button now works when idle, and when a run is already active the dashboard clearly shows running state and provides immediate stop control.
+
+### [ID: 20260713-17] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: integrate external `PrdFineTuningAgent` into dashboard cube 4 with run button, categories combo, automatic start-url completion for selected category, running indication, and real-time terminal output.
+- Implementation: performed pre-development checkpoint commits in both repos; inspected `C:/Projects/PrdFineTuningAgent/main.py` and confirmed required params (`--start-url` required; optional `--api-key`, `--model`, `--output`, `--log-file`, `--limit`) and JSON output behavior (default relative `audit_report.json`, now explicitly passed absolute timestamped output path). Added backend integration in `server.py`: new POST route `/api/product-agent/start` that runs `C:/Projects/PrdFineTuningAgent/main.py` with computed URL and output/log paths, new GET route `/api/product-agent/status`, and dashboard stats enrichment for cube-4 agent metadata/running state. Added cube-4 UI in `index.html`: category combo (`כל האתר` + all MG categories), `הפעל` button, URL preview, output-path display, and dedicated real-time terminal panel. Updated `app.js` to populate combo from categories list, auto-build URL `https://www.king-games.co.il/products/cat/XXX` when category is selected, start agent via API, show running state, and stream live logs to the new cube-4 terminal via existing background log polling.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: frontend diagnostics passed on updated files; endpoint wiring and UI event handlers compiled without errors; dashboard cube 4 now exposes start controls, URL preview, live status, and terminal stream target.
+- Outcome: PrdFineTuningAgent is now integrated into dashboard cube 4 with end-to-end launch + monitoring flow for full-site or per-category runs.
+
 ### [ID: 20260713-16] [Status: completed]
 - Timestamp: 2026-07-13
 - Request: in supplier ingestions history screen, add a summary table above the existing table that shows only one row per supplier, selecting the latest ingestion closest to now, with exactly the same columns as current table.

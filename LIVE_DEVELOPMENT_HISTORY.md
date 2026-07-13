@@ -36,6 +36,14 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260713-19] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: persist PrdFineTuningAgent output JSON into DB continuously, handle partial files safely, expose product-level recommendation view, and register daily process at 07:00.
+- Implementation: completed backend wiring in `server.py` for product-agent queue lifecycle: expanded run metadata (`run_id`, `active_marker_path`), added stale-process refresh/cleanup helpers, ensured `product_agent_recommendations` table creation during `init_db`, routed product recommendation API (`GET /api/product/recommendation?mg_id=...`), enriched product details payload with recommendation existence fields, and added background importer thread (`product_agent_output_import_loop`) using `process_product_agent_output_queue_once`. Registered default automated process `עיבוד פלט סוכן טיוב מוצרים` pinned to 07:00. Fixed integration bug by aligning importer loop call signature and shared queue path base. In frontend, added drawer button `המלצות לתיקון`, modal viewer for readable metadata + pretty JSON payload, and dynamic enable/disable state based on product recommendation availability; bumped app/static version to `0.85` and backend API version to `0.54`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/product_agent_output_importer.py, king_games_product_manager/process_product_agent_output_queue.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics returned no errors for changed `server.py`, `app.js`, and `index.html`; route and UI wiring compile cleanly; importer loop now calls valid function signature and uses consistent queue base path.
+- Outcome: product-agent outputs are now ingested continuously into DB with safe partial-file handling, product drawer can display correction recommendations from stored JSON, and a scheduled 07:00 process entry exists for daily queue processing.
+
 ### [ID: 20260713-18] [Status: completed]
 - Timestamp: 2026-07-13
 - Request: fix issue where cube-4 dashboard "הפעל" button appears not to start the new PrdFineTuningAgent.

@@ -36,6 +36,22 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260714-27] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: complete failed preupload ingestion retry for pending products and stabilize CMS publish selectors after repeated no-such-element failures on save/image fields.
+- Implementation: added resilient CMS selector utilities in `update_products_batch_2.py` (`find_cms_save_button`, `click_cms_save`, `find_cms_image_input`) and replaced hardcoded XPath save clicks + strict image input IDs with fallback-driven logic (button/input/link detection, JS click, form submit fallback, and file-input slot fallback); reran targeted category publish flow for pending products.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: targeted run `update_products_batch_2.py category:400 --publish-to-mg --headless --skip-if-no-supplier-images` completed with successful publish logs for products `35675` and `35676`; DB check confirms `pending_preupload_cat400=0` and both products now `is_preupload=0`, `sync_flag=1`.
+- Outcome: pending preupload queue for category 400 cleared and publish flow no longer aborts on missing hardcoded save/image selectors.
+
+### [ID: 20260714-26] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: ingestion run on טרום העלאה לאתר produced long WinError 6 logs and ended with partial processing/images.
+- Implementation: hardened `undetected_chromedriver` lifecycle in supplier extractors (`benda_image_scrapter.py`, `morlevi_site_scrapter.py`) with safe destructor patch and safe quit handling for `WinError 6`; enabled stable headless options for both extractors; fixed CMS JS fill step in `update_products_batch_2.py` to guard missing fields before setting `.value`/`.checked`, preventing `Cannot set properties of undefined`; bumped versions to app `1.04` and API `0.65`.
+- Files changed: king_games_product_manager/helper_scripts/image_extractors/benda_image_scrapter.py, king_games_product_manager/helper_scripts/morlevi_site_scrapter.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke executed both supplier extractors without unhandled exceptions (`benda ok list=49`, `mor ok list=0`); diagnostics on edited files passed.
+- Outcome: WinError 6 noise no longer breaks extractor flow, and missing CMS fields no longer abort publish pass with JS undefined errors.
+
 ### [ID: 20260714-25] [Status: completed]
 - Timestamp: 2026-07-14
 - Request: in prediction output, stop printing separate Hebrew/English manufacturer fields and print only one field: `יצרן: [English manufacturer name]`.

@@ -36,6 +36,230 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260714-25] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: in prediction output, stop printing separate Hebrew/English manufacturer fields and print only one field: `יצרן: [English manufacturer name]`.
+- Implementation: updated `product_scraper_engine/enricher.py` prompt/spec/validation so `PRODUCT_MANUFACTOR` requires English manufacturer only; removed Hebrew manufacturer requirement; updated HTML prediction report header to print a single manufacturer line in format `יצרן: ...`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke test confirmed report no longer prints dual language manufacturer display and now contains only `יצרן: HP`; validation no longer warns about missing Hebrew manufacturer.
+- Outcome: prediction output now shows one manufacturer field in English only, per requested format.
+
+### [ID: 20260714-24] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: if supplier product name exists, force it as the final product title with no AI intervention; only when supplier name is missing should AI title logic run.
+- Implementation: updated local enrichment title resolution in `update_products_batch_2.py` to read `METADATA.SUPPLIER_PRODUCT_NAME`, lock final title to supplier value when present, bypass AI/template title decision in that case, and mirror the locked value into both `PRODUCT_NAME` and `FORMATTED_TITLE` before save.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke check confirms new supplier-lock branch exists (`[Title][Supplier Lock]`), reads `SUPPLIER_PRODUCT_NAME`, and writes `FORMATTED_TITLE = final_title`; diagnostics report no errors in changed files.
+- Outcome: title source policy is now deterministic: supplier title wins always when available; AI title is used only as fallback.
+
+### [ID: 20260714-23] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: fix weak product title quality (example MG 35663 "זיכרון אפור") by changing enricher order to fetch supplier product name and images before AI prediction, with explicit Banda product-title XPath support.
+- Implementation: added supplier-context prefetch flow in `product_scraper_engine/enricher.py` so supplier site title/images are collected before AI call and supplier title becomes `Input Product Name (Primary)` when available; expanded prompt inputs to include DB title + supplier-site title with updated priority rules; added `fetch_context()` contract in `product_scraper_engine/selenium_fetcher.py`; implemented Banda supplier title extraction using exact XPath `/html/body/div[2]/div/main/div[2]/div[2]/div/div/div[1]/div[2]/div/h2` plus image collection in pre-AI stage; hardened fetcher imports so supplier extractors load regardless current working directory.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/product_scraper_engine/selenium_fetcher.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke test for Banda SKU `90904-721-17` returned supplier title and 28 images from supplier context; AI-on enrichment test confirmed logs show pre-AI supplier fetch, prompt contains `Input Product Name (Primary)` and `Input Product Name (Supplier Site)`, final enrichment returned 28 verified images.
+- Outcome: enrichment order is now supplier-first (title + images) before prediction, improving model context quality for bad/stale DB titles and providing a reusable path for additional suppliers.
+
+### [ID: 20260714-22] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: for every Product Ingestion Console run, persist the list of updated MG SKUs for manual REVIEW; add REVIEW button in product runs history to open product links list with done/not-done status tracked in DB; keep historical MG upload timestamps for future audit.
+- Implementation: added DB-backed review tracking per run (`ingestion_run_review_items`) and MG upload lifecycle fields on products (`first_mg_uploaded_at`, `last_mg_uploaded_at`), wired run pipelines to persist updated MG IDs, added backend APIs to fetch/update review status, and added UI REVIEW button + modal with product links (`https://www.king-games.co.il/products/item/XXX`) and toggle status (בוצע/לא בוצע).
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed; schema bootstrap verified table/columns creation; REVIEW API/UI wiring compiled clean.
+- Outcome: each ingestion run now keeps a durable, DB-backed manual review checklist with per-product status tracking and historical upload timestamps.
+
+### [ID: 20260714-21] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: improve poor short titles (example product 35679) by forcing AI to build title only after full information analysis and avoid 3-word titles.
+- Implementation: updated `enricher.py` prompt with strict generation-order rule (description/specs/attributes first, title last), enforced minimum 6 words for PRODUCT_NAME and FORMATTED_TITLE, and required manufacturer+model in title when confidently known.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke checks confirmed new prompt clauses are present and validation now flags short titles (<6 words).
+- Outcome: title generation is now constrained to produce richer model-aware names and avoid low-quality 3-word outputs.
+
+### [ID: 20260714-20] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: prevent critical supplier/manufacturer misclassification (example: model identified as ASUS incorrectly) by forcing AI to inspect title, part code, and supplier together.
+- Implementation: updated `enricher.py` prompt to include `Input Supplier Name`, and added strict rules requiring manufacturer extraction from title when present plus cross-check against part codes and supplier before deciding manufacturer.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke check confirms prompt now contains supplier input line and all new anti-mismatch constraints.
+- Outcome: AI receives explicit constraints to avoid critical supplier/brand mistakes by evidence-based title+code+supplier reconciliation.
+
+### [ID: 20260714-19] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: remove conflicting hardcoded title pattern from AI prompt and enforce choosing title format only from provided title-rules templates.
+- Implementation: updated `product_scraper_engine/enricher.py` prompt to remove old fixed PRODUCT_NAME format block and enforce template selection from the full provided title-rules set by product essence; explicitly forbids external/hardcoded templates when rules are provided.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke check confirms old hardcoded format text is absent and new rule-selection constraints are present.
+- Outcome: AI now chooses title structure from your configured title-rules templates instead of a generic built-in format.
+
+### [ID: 20260714-18] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: verify AI always receives the latest product title from DB (specifically for product 35680) and sharpen international-code rule so code in title is treated as international code and used in formatted title when required.
+- Implementation: strengthened `enricher.py` prompt instructions with explicit DB-title authority and explicit international-code priority from Input Product Name (including prediction title text), and kept fallback to input MPNs/inference only when title has no code.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke validation for product 35680 confirmed DB title is read and injected into `Input Product Name` exactly, and prompt includes the new DB-priority + title-code-priority rules.
+- Outcome: AI enrichment now has explicit deterministic guidance to trust DB title first and treat code inside title as international code candidate with highest priority.
+
+### [ID: 20260714-17] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: set fixed visible size for product title-rule template editor (so text is always readable) and bump release version.
+- Implementation: updated title-rules template textarea in `app.js` to `cols=40` and `rows=8` for both existing rows and newly added rows in the editor, then bumped app/server versions.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for modified frontend/backend files.
+- Outcome: title template field now keeps a stable editing area (40 characters x 8 lines), and release version was raised.
+
+### [ID: 20260714-16] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: enforce title-rules source from runtime API (not stale local assumptions) and prevent title mismatch between local DB and MG product card.
+- Implementation: updated `update_products_batch_2.py` to load title rules API-first from `/api/title/rules` with local file fallback, and hardened CMS title writing by setting/verifying product-name field across multiple selectors before pass-1 save, after pass-2 reopen, and before pass-2 save.
+- Files changed: king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed; runtime smoke confirmed API rules load (`rules_count=9`) and prompt rules text includes live monitor template requiring inch token.
+- Outcome: enrichment now always consumes live title instructions from API when available, and MG form title persistence is significantly more robust against field/DOM variability.
+
+### [ID: 20260714-15] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: fix failure where MG product card attributes were not updated even though AI returned correct answers.
+- Implementation: repaired and hardened category-attribute mapping in `update_products_batch_2.py` so pass-2 MG updates now support flexible AI formats (`34`, `param_34`, and label-only), normalized value matching against CMS option text/value, and fallback to `PRODUCT_ATTRIBUTES` when coded selections are missing in payload. Also repaired a corrupted function block that could silently break full description/attribute flow.
+- Files changed: king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed; unit-style smoke mapping confirmed updates resolve and map correctly for code-only, `param_*`, and label-only AI outputs.
+- Outcome: MG pass-2 attribute updates are now resilient and should apply the AI-selected category values reliably.
+
+### [ID: 20260714-14] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: send category attributes with codes and all possible values to AI, get selected values back, and apply them in MG pass 2 after category update.
+- Implementation: added category-attribute code extraction from DB in `update_products_batch_2.py` (parameter code + `param_*` name + options), passed that block to AI via `enricher.py` prompt, and extended AI schema with `RECOMMENDED_CATEGORY_ATTRIBUTES` (`parameter_code`, `attribute_name`, `selected_option_value`). The enrichment payload now stores these AI coded selections, and `update_product_on_cms` pass-2 now applies them directly to CMS selects by `param_*` code/value before DB text fallback.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/product_scraper_engine/enricher.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for updated files; smoke tests confirmed category 99 now yields coded attributes (e.g., `param_34`, `param_46`, `param_112`) and prompt includes the coded attributes block + `RECOMMENDED_CATEGORY_ATTRIBUTES` section.
+- Outcome: AI now receives category attributes with codes/options and the MG pass-2 updater can set category parameters using AI-returned coded values.
+
+### [ID: 20260714-13] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: raise project version for a new release.
+- Implementation: bumped backend API version and frontend app/cache-busting versions.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for updated server/frontend files.
+- Outcome: release versions updated to API `0.56` and App `0.94`.
+
+### [ID: 20260714-12] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: ensure AI extracts international manufacturer code from the original product title before enrichment, returns it in JSON, and inserts it into the new formatted title when required by template.
+- Implementation: strengthened `product_scraper_engine/enricher.py` prompt rules so `INTERNATIONAL_PART_NUMBER` must first be extracted from `Input Product Name`, then fallback to input MPNs/inference only if needed; added required JSON field `INTERNATIONAL_PART_NUMBER_SOURCE` with values `title|input_mpns|inferred|none`; added explicit instruction to include the extracted code inside `FORMATTED_TITLE` when the selected title template contains SKU/international-code tokens. Wired payload persistence of `international_part_number_source` in `update_products_batch_2.py`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for updated files; prompt smoke check confirmed presence of the new mandatory extraction instruction, source field, and template insertion rule.
+- Outcome: AI is now explicitly guided to prioritize extracting international code from the original title text and report the extraction source in JSON.
+
+### [ID: 20260714-11] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: fix failure where AI predicted title for product 35681 did not match the saved screen template.
+- Implementation: added a strict title-rule guardrail in `update_products_batch_2.py`: when AI returns `FORMATTED_TITLE`, the pipeline now compares it against deterministic rendering from the selected template and auto-corrects on mismatch. Added support for newly used template tokens (`יצרן אנגלית`, `גודל מסך באינטש מקוצר`, `מקט יצרן בינלאומי חובה`, `מקט אוניברסלי`) and improved screen-size extraction from model patterns (e.g. `C27...`).
+- Files changed: king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed; simulation with failing AI title (`מסך גיימינג קעור 180Hz 1ms VA שחור`) now auto-corrects to template-compliant output; product `35681` local title was updated to `מסך גיימינג קעור AOC 27" 180Hz 1ms VA 36603-272-27 שחור`.
+- Outcome: even when AI drifts from the template, the final saved title now stays compliant with your saved rule.
+
+### [ID: 20260714-10] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: force title formatting through the AI agent itself (using the full saved title rule), and require the AI to try returning an international SKU/part number for every product.
+- Implementation: updated `product_scraper_engine/enricher.py` prompt and response schema to require `FORMATTED_TITLE` (new final title from the selected rule) and `INTERNATIONAL_PART_NUMBER` (EAN/UPC/GTIN/universal MPN when found); added validation warnings when those fields are missing. Updated `update_products_batch_2.py` to use `FORMATTED_TITLE` as the primary final title (with local rule renderer only as fallback), and persist `international_part_number` in the saved payload while using it as preferred manufacturer SKU.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for both updated Python files; smoke checks confirmed new fields are parsed/used and AI-formatted title is preferred in save flow.
+- Outcome: title rule enforcement is now requested directly from AI with a dedicated output field, and each enrichment now explicitly asks for an international SKU.
+
+### [ID: 20260714-09] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: remove duplicated attributes section from prediction descriptions, leaving only the technical specification section.
+- Implementation: updated `build_full_desc_html_from_engine` in `update_products_batch_2.py` to stop rendering the `מאפייני מוצר` block from `PRODUCT_ATTRIBUTES`; the generated full description now includes description + `מפרט טכני` + FAQ only.
+- Files changed: king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for `update_products_batch_2.py`; smoke render check confirmed `מפרט טכני` exists and `מאפייני מוצר` no longer appears in generated HTML.
+- Outcome: prediction descriptions no longer duplicate specs under a second attributes section.
+
+### [ID: 20260714-08] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: make the saved title rules actually change the product name during enrichment, so product 35681 (screen) is renamed according to the stored screen rule instead of keeping the old AI title.
+- Implementation: added a deterministic title-rule renderer in `update_products_batch_2.py` that selects the best active rule by recommendation/category/text, fills the rule template from the enriched product data plus the stored short description, and writes the rendered title back into `PRODUCT_NAME` before the product is saved and published.
+- Files changed: king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for `update_products_batch_2.py`; a Python smoke test on product 35681 confirmed the saved screen rule now renders a monitor title starting with `מסך` and including `180Hz`, `1ms`, and `VA` from the stored short description.
+- Outcome: title rules now affect the actual product name, not just the recommendation fields, so the screen product no longer keeps the old misleading title.
+
+### [ID: 20260714-07] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: fix the new title-rules screen so opening it and saving rules does not throw errors when the config file is missing or invalid.
+- Implementation: hardened the title-rules loader in `server.py` to recover from any JSON or I/O failure by rewriting a default config, and added the same defensive recovery in `update_products_batch_2.py` so ingestion can safely read or recreate the title-rules file. Also created the default `title_header_rules.json` with starter rules so the screen has data immediately.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/title_header_rules.json, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for `server.py`, `update_products_batch_2.py`, `app.js`, `index.html`, and `enricher.py`; a Python smoke test confirmed `load_title_rules_text()` returns populated title-rules text from the new config file.
+- Outcome: the title-rules screen should now open and save safely even on a fresh or corrupted configuration file.
+
+### [ID: 20260714-06] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: add a new service-program screen called "חוקי כותרות למוצרים" so product title templates can be managed per product type and sent to the AI during ingestion.
+- Implementation: added a dedicated title-rules view under the service-programs menu, backed by a shared JSON config and API endpoints in `server.py`; the frontend now lets users add/edit/save title rules; the enricher prompt receives active title rules and asks Gemini to choose the best rule and product type; the ingestion flow now passes the title rules into the AI and stores the recommended title rule/type in the payload.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for all edited files; prompt smoke tests confirmed the new recommended title-rule fields and the title-rules block are present; the ingestion helper loaded title rules safely when the config file is absent.
+- Outcome: title formatting is now a configurable service-program workflow, and the AI receives the available title templates instead of being hard-coded to a single product-title pattern.
+
+### [ID: 20260714-05] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: add paragraph spacing before technical specs and Q&A, and send all leaf categories to the AI enricher so it can choose the best-fit category.
+- Implementation: updated the HTML builders to insert `<p></p>` before the technical-spec and Q&A sections; extended the enricher prompt and schema with leaf-category guidance plus `RECOMMENDED_CATEGORY_ID` / `RECOMMENDED_CATEGORY_NAME`; wired the ingestion flow to pass the full leaf-category list into the AI and to use a valid AI-recommended leaf category when category changes are enabled.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics passed for the updated Python/HTML files; a prompt smoke test confirmed the leaf-category block and recommended-category fields are present; an HTML smoke test confirmed the rendered output now contains `<p></p>` before specs and Q&A and no longer emits tables for the technical section.
+- Outcome: technical content has the requested spacing, and AI enrichment can now choose among leaf categories instead of being locked to the original category.
+
+### [ID: 20260714-04] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: stop rendering the MG technical specification as HTML tables; use LI rows instead.
+- Implementation: replaced the spec and attribute table builders in `update_products_batch_2.py` with `<ul>/<li>` markup using bolded labels, so the generated MG content no longer uses HTML tables for technical specs or product attributes.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics on the updated Python file passed with no errors, and a search confirmed the product spec builders now emit `product-tech-details-list` / `product-attributes-list` instead of table markup.
+- Outcome: MG technical specifications are now delivered as list items rather than HTML tables.
+
+### [ID: 20260714-03] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: make the automatic product ingestion console use local DB content as a real fallback when AI completion is disabled; if no local content exists, skip the product and log the reason.
+- Implementation: added a local fallback payload builder in `update_products_batch_2.py` that reconstructs title/short/full/payload/images/attributes from existing DB fields and `extra_info`; when `ai_agent=off`, the local ingestion flow now saves that fallback content back into the product row instead of calling the external enrichment engine; if no usable local content exists, the product is skipped and a skip/error log entry records why; publishing-to-MG now always runs the local materialization stage first so the fallback can populate DB content before publish.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics reported no errors in updated files; direct smoke test on product 35681 with `ai_agent=off` returned a valid local fallback payload from the DB with title, short text, full text, image URLs, and product attributes.
+- Outcome: the auto-ingestion console now has a real non-AI fallback path using local/manual content, and empty products are safely skipped with a clear log reason.
+
+### [ID: 20260714-02] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: enforce MG-safe image sizes so every supplier image is compressed/resized to a maximum of 145KB before upload, with quality allowed down to 80% and resolution reduction when needed.
+- Implementation: raised the shared optimizer in `image_resolver.py` from a 100KB target to 145KB, with quality search from 95 down to 80 and fallback resizing down to 30% if needed; switched shared batch image downloads in `update_products_batch_2.py` to use the optimizer; updated direct supplier image savers in `LOAD_IMAGES_TECHNO.py`, `LOAD_IMAGES_ASUS_ROG_new.py`, and `SEARCH_IMAGES_FOR_PRDS_SERPAPI_KEY.py` to use the same shared optimizer so the same file-size cap applies everywhere.
+- Files changed: king_games_product_manager/image_resolver.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/helper_scripts/image_extractors/LOAD_IMAGES_TECHNO.py, king_games_product_manager/helper_scripts/image_extractors/LOAD_IMAGES_ASUS_ROG_new.py, king_games_product_manager/helper_scripts/image_extractors/SEARCH_IMAGES_FOR_PRDS_SERPAPI_KEY.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics reported no errors in changed files; smoke tests on Benda images showed optimized outputs well under 145KB.
+- Outcome: supplier image handling now conforms to the MG upload limit and should no longer be rejected for oversized image files.
+
+### [ID: 20260714-01] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: debug why single-product update for MG 35681 (supplier בנדא) did not upload images, and fix the Benda image extraction path.
+- Implementation: replaced the Benda image extractor with a requests-first HTML parser that extracts product-specific image URLs from the public product page, then falls back to Selenium only if needed; filtered results to SKU-matching URLs to avoid site logos and unrelated assets; kept the existing fetcher integration path intact so the normal ingestion/update flow can use the improved extractor automatically. Bumped frontend version/cache to 0.89 as part of the project version policy.
+- Files changed: king_games_product_manager/helper_scripts/image_extractors/benda_image_scrapter.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: direct smoke tests on SKUs `36603-272-27` and `80803-001-23` returned product-specific Benda image URLs; diagnostics reported no errors in changed files.
+- Outcome: Benda image extraction now works for supplier-based single-product updates, including MG 35681, and should populate product images instead of returning an empty list.
+
+### [ID: 20260713-23] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: in dashboard cube 4 (product-agent), hide the output file path line because long paths make the terminal area too large and unreadable.
+- Implementation: removed the `dashProductAgentOutputPath` element from dashboard markup and removed JS assignments that printed `output_path` in cube 4 on start/status refresh; kept only URL preview + live terminal stream; bumped frontend version/cache to `0.88`.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics reported no errors in changed frontend files.
+- Outcome: cube 4 no longer displays the long output-path line, keeping the terminal block compact and readable.
+
+### [ID: 20260713-22] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: add a new ingestion-console mode `מוצרים שיש להם המלצה לתיקון` that runs on all products with product-agent recommendations and follows this flow: apply recommended local field changes, save locally, optionally publish to MG when the publish checkbox is enabled, and after successful MG publish delete the recommendation row for that product.
+- Implementation: added new mode option in ingestion mode combo in `index.html`; fixed ingestion mode pass-through in `app.js` so non-range/category/single values are sent as-is to backend (including the new mode); implemented recommendation pipeline support in `update_products_batch_2.py` by adding product selection from `product_agent_recommendations`, local recommendation application from `audit.proposed_content` (title/short/full/extra_info update + `sync_flag=1`, `is_preupload=1`), publish-flow integration for this mode, and post-publish recommendation cleanup (`DELETE FROM product_agent_recommendations WHERE mg_id=?`) only after successful MG publish.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics reported no errors in changed files; direct Python smoke verified recommendation-mode selection returns products, local recommendation application succeeds for `15599`, and the script imports/loads successfully.
+- Outcome: ingestion console now supports end-to-end processing of agent-recommended products with optional MG publish and automatic recommendation cleanup after successful upload.
+
+### [ID: 20260713-21] [Status: completed]
+- Timestamp: 2026-07-13
+- Request: prepare a comprehensive beginner-level Hebrew booklet (RTL) that explains the full system goals, modules, supplier pricelist intake flow, AI enrichment + MG publishing flow, suppliers/pricelists/automations/images, processes, background operations, and SAP/Google integrations with examples.
+- Implementation: created a full right-to-left Hebrew guide document with structured chapters, role-based explanation, architecture overview, module-by-module coverage, end-to-end flow, detailed pricelist intake steps, detailed AI-to-MG upload path, automations/processes behavior, SAP/Google integration explanation, troubleshooting, glossary, and practical beginner scenarios.
+- Files changed: HOVERET_MAARECHET_KINGGAMES_v0.86.md, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: reviewed generated guide structure for requirement coverage including all requested topics and beginner-focused examples.
+- Outcome: a comprehensive operator booklet is now available in Hebrew RTL format for onboarding and daily operations.
+
 ### [ID: 20260713-20] [Status: completed]
 - Timestamp: 2026-07-13
 - Request: finalize and push improved release that includes pricelist-intake improvements and product-improvement-agent integration, plus resolve visibility issues for recommendation button in product drawer.

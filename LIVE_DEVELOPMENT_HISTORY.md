@@ -36,6 +36,137 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260716-02] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: הקריאה מקובץ הלידים לא טובה; הוכן קובץ CSV מסודר חדש בנתיב קבוע `C:\Projects\KINGGAMES\king_games_product_manager\downloads\all_users last5000 לידים Taskey.csv` ויש לעדכן את המערכת לעבוד מולו עם יותר התאמות להצעות SAP.
+- Implementation: הוחלף נתיב מקור הלידים הקנוני ב-`server.py` לנתיב החדש; במסלול `get_sap_taskey_offers_vs_leads_report` בוטלה תלות ב-`leads_path` מה-query והוגדר שימוש קשיח בקובץ הקנוני כדי למנוע סטיות מקור; נשמרה לוגיקת נרמול הטלפונים הקיימת (כולל `00972/972 -> 0` והשלמת `0` למספרי סלולר בני 9 ספרות) שמתאימה לפורמט הקובץ החדש עם עמודת `טלפון`; הועלו גרסאות ל-API/APP: `0.82`/`1.20` ועודכן cache-bust ב-`index.html`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: נקראו שורות ראשונות מהקובץ החדש ואומת קיום עמודת `טלפון` וערכים תקינים לנרמול; diagnostics נקיים לקבצים ששונו.
+- Outcome: דוח TASKEY מול SAP קורא כעת מהקובץ החדש והקבוע, כך שסביר לקבל היקף התאמות גבוה יותר ללידים העדכניים.
+
+### [ID: 20260716-01] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: הרצת כלי החלפת רכיב במחשבים נייחים נכשלה עם `Desktop replacement apply error: CMS login appears to have failed (login form still visible)`.
+- Root cause: מנגנון `ensure_logged_in` ב-`replace_desktop_tree_component.py` הסתמך על submit Selenium בלבד ונתקע במסך לוגין למרות שסשן HTTP תקין ניתן להשגה; בנוסף הזרקת cookie הייתה קשיחה מדי (variant יחיד עם דגל secure) ולכן לא תמיד אומצה ע"י הדפדפן.
+- Implementation: קשיחות login הוגדלה בשלושה מישורים: (1) זיהוי טופס לוגין לפי אלמנטים נראים ולא לפי page-source בלבד, (2) fallback ל-login דרך HTTP endpoint המאומת (`/apanel/products_categories`) עם token, (3) הזרקת `PHPSESSID` בכמה וריאנטים ל-Selenium + אימות על עמוד categories. בנוסף `get_driver` הותאם להעדיף התחברות ל-debug session קיים (9222/9225, auth-hint) כדי למחזר סשן מחובר במקום לפתוח פרופיל מבודד כברירת מחדל.
+- Files changed: king_games_product_manager/replace_desktop_tree_component.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקת smoke לפונקציה `ensure_logged_in` כעת מחזירה `LOGIN_OK` במקום RuntimeError; שרת הופעל מחדש ומחזיר `api_version=0.81`.
+- Outcome: כשל ההתחברות של כלי החלפת רכיב לא אמור לחסום יותר את תחילת ריצת ה-apply באותו תרחיש.
+
+### [ID: 20260715-12] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: המשתמש דיווח שהקטגוריות מופיעות אבל עץ הקטגוריות עדיין לא נכון.
+- Root cause: בחילוץ HTML של עמוד `products_categories` הסקריפט פירש שדה מספרי מטבלת MG כ-`parent`, למרות שזה אינדקס תצוגה ולא מזהה הורה; בנוסף ספירת עומק לפי סימן גרפי גרמה ל-depth שגוי ברמות שורש.
+- Implementation: עודכן `sync_mg_categories.py` לחישוב היררכיה לפי הזחה אמיתית של שם הקטגוריה (leading `\xa0`/spaces), עם עומק מדרגי של 4 רווחים לרמה; בוטלה תלות בסימן גרפי עבור depth; ה-parent נגזר שוב נכון דרך stack depth. הועלו גרסאות API/APP ל-`0.80`/`1.18`.
+- Files changed: king_games_product_manager/sync_mg_categories.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: אחרי `POST /api/categories/sync/start` הסטטוס מסתיים `success`; דגימת parentים במסד: `400 -> 184`, `403 -> 400`, `405 -> 184`, `408 -> 184`; `/api/categories/management` מחזיר `tree=5`, `flat=177`.
+- Outcome: מבנה העץ תואם היררכיה מעודכנת מהמקור MG במקום parent שגוי מעמודת אינדקס.
+
+### [ID: 20260715-11] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: המשתמש דיווח שבמסך החדש לא מופיעות קטגוריות, והרגיש שהסנכרון עדיין לא עובד.
+- Root cause: בניית העץ ב-`/api/categories/management` בחרה שורשים רק כאשר `parent=''`, בעוד שבנתוני MG לרוב הקטגוריות יש `parent` מספרי ולכן `tree` חזר ריק; בנוסף רצו במקביל 2 תהליכי שרת על פורט 8000 שגרמו לתוצאות סותרות (גרסאות שונות).
+- Implementation: עודכן `get_categories_management` ב-`server.py` לזיהוי שורשים תקין (parent ריק/עצמי/הורה חסר), הגנת cycle ברקורסיה, ו-fallback למניעת עץ ריק; נוסף fallback מקביל ב-UI ב-`app.js`; הועלו גרסאות API/APP ל-`0.78`/`1.16`; בוצע kill לשני השרתים והפעלה נקייה של מופע יחיד.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `/api/health/version` מחזיר `api_version=0.78`; `/api/categories/management` מחזיר `count=177`, `tree=132`, `flat=177`; `POST /api/categories/sync/start` ולאחריו status מסתיימים ב-`last_status=success` ו-`last_message=Completed successfully`.
+- Outcome: מסך ניהול קטגוריות מקבל עץ בפועל (לא ריק), וסנכרון קטגוריות MG עובד ומסתיים בהצלחה.
+
+### [ID: 20260715-10] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: סטטוס סנכרון קטגוריות MG נשאר `failed` עם הודעת התחברות (auth) גם אחרי שיפורי Selenium.
+- Implementation: נוספה ב-`sync_mg_categories.py` אסטרטגיית סנכרון חדשה מבוססת HTTP session (cookie+token login) שמתחברת ל-`/apanel/products_categories` ללא תלות ב-Chrome Debug Session, מחלצת קטגוריות מה-HTML (table rows + links + options), ומשתמשת ב-Selenium רק כ-fallback. תוקן גם פענוח תגובת HTTP כדי לשמר טקסט עברי (charset-aware decode עם fallbacks). בנוסף בוצעו version bumps: API `0.77`, APP `1.15`.
+- Files changed: king_games_product_manager/sync_mg_categories.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: הרצה ישירה של `sync_mg_categories.py` הסתיימה בהצלחה (`RETURN_CODE=0`) עם `HTTP extraction succeeded with 177 categories`; בדיקת API: `POST /api/categories/sync/start` ולאחר מכן `GET /api/categories/sync/status` החזירה `last_status=success`, `is_running=false`, `last_message=Completed successfully`.
+- Outcome: סנכרון הקטגוריות עובד אוטומטית גם כש-Selenium לא מצליח להתחבר ל-MG דרך פרופיל כרום.
+
+### [ID: 20260715-09] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: טיפול בכשל החוזר בסנכרון קטגוריות MG שהופיע ב-UI כ-`failed` עם `Traceback` מלא אחרי לחיצה על "סנכרן קטגוריות עכשיו".
+- Implementation: חיזוק מנגנון לוגין ב-`sync_mg_categories.py` (מילוי שדות עם `send_keys` + fallback, submit אמיתי והמתנה חכמה ליציאה ממסך לוגין), הוספת דיאגנוסטיקה (`url` + שגיאת עמוד אם קיימת), בחירת פורט debug עם `auth hint score`, והעדפת פרופיל כרום משותף (`workspace chrome-profile`) כדי להשתמש בסשן מאומת קיים. בנוסף בוצע ניקוי UX של שגיאה: הסקריפט לא מדפיס יותר Traceback לשגיאת auth צפויה אלא הודעה תפעולית קצרה וברורה.
+- Files changed: king_games_product_manager/sync_mg_categories.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: הרצה ידנית של הסקריפט מחזירה קוד יציאה 21 עם הודעת פעולה ברורה וללא stderr traceback; `POST /api/categories/sync/start` עובד; `GET /api/categories/sync/status` מתעדכן ל-`is_running=false` עם `last_status=failed` והודעת auth קצרה (ללא stack trace).
+- Outcome: הבעיה הפכה מדיווח טכני לא קריא לדיווח תפעולי ברור. החסם היחיד שנותר כדי להגיע ל-`success` הוא אימות MG פעיל בפרופיל הכרום שבו האוטומציה משתמשת.
+
+### [ID: 20260715-08] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: לאחר לחיצה על "סנכרן קטגוריות עכשיו" המשתמש עדכן שעמוד הקטגוריות הנכון ב-MG הוא `https://www.king-games.co.il/apanel/products_categories`.
+- Implementation: עודכן `sync_mg_categories.py` כך שהסנכרון מכוון לעמוד הקטגוריות הייעודי (`products_categories`) במקום להסתמך על עמוד עריכת מוצר; נוספה לוגיקת חילוץ רב-אסטרטגית (טבלה/לינקים/אופציות) עם fallback מובנה; שופר זיהוי מסך התחברות כדי להימנע מ-false positive/false negative; הוסר `SyntaxWarning` של regex במחרוזת JavaScript באמצעות raw string; הוחזרה הודעת שגיאה אופרטיבית וברורה במקרה שהסשן לא מאומת.
+- Files changed: king_games_product_manager/sync_mg_categories.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: הרצה ישירה של `sync_mg_categories.py` מראה שהסקריפט נפתח בעמוד `products_categories` ומגיע למסלול החילוץ החדש; `/api/health/version` מחזיר `0.75`; הפעלת `POST /api/categories/sync/start` מחזירה הצלחה ומריצה את התהליך החדש.
+- Outcome: הסנכרון מחובר לעמוד הקטגוריות הנכון של MG. החסם שנותר בסביבה הנוכחית הוא אימות התחברות ל-MG בפרופיל הכרום של האוטומציה (session login), ולא עוד נתיב עמוד שגוי.
+
+### [ID: 20260715-07] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: להוסיף תחת ניהול מוצרים מסך חדש בשם "ניהול קטגוריות" בעץ עם הזחות לקטגוריות בן, ולהוסיף עיבוד חדש לסנכרון קטגוריות מאתר MG שרץ כל בוקר.
+- Implementation: נוספה כניסת ניווט חדשה "ניהול קטגוריות" תחת קבוצת "ניהול מוצרים"; נוסף מסך UI חדש עם עץ היררכי (עם הזחות), מוני קטגוריות, סטטוס סנכרון, כפתור רענון וכפתור "סנכרן עכשיו"; ב-`server.py` נוספו API-ים חדשים לניהול קטגוריות (`GET /api/categories/management`), סטטוס סנכרון (`GET /api/categories/sync/status`) והפעלה ידנית (`POST /api/categories/sync/start`); נוסף תהליך ברירת מחדל חדש בטבלת התהליכים האוטומטיים בשם "סנכרון קטגוריות MG" המבוסס על `sync_mg_categories.py`, מתוזמן ל-07:00 כל יום; נוסף סקריפט `sync_mg_categories.py` שמתחבר ל-MG דרך Chrome Debug, קורא את רשימת הקטגוריות ממסך עריכת מוצר (`select#category`), בונה היררכיה מעומקי הזחה, ומסנכרן לטבלת `categories` (יצירה/עדכון/סימון לא פעיל לקטגוריות ישנות).
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, king_games_product_manager/sync_mg_categories.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `/api/health/version` מחזיר `api_version=0.74`; `/api/categories/management` ו-`/api/categories/sync/status` מחזירים 200 ונתונים תקינים; `POST /api/categories/sync/start` מפעיל את התהליך ומחזיר הצלחה.
+- Outcome: מסך ניהול קטגוריות בעץ נוסף ועובד, ותזמון יומי לסנכרון קטגוריות נוסף למערכת. בריצת smoke בסביבה הנוכחית זוהתה תלות בהתחברות תקינה ל-MG (התהליך מדווח login failure כשהסשן אינו מאומת), אך התשתית המלאה לסנכרון האוטומטי והידני קיימת ומחוברת.
+
+### [ID: 20260715-06] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: במסוף הזנת מוצרים אוטומטית להוסיף סימון "בדוק קבצים בספרייה מקומית" לפני מנוע תמונות; אם נמצאו תמונות מקומיות יש לדלג על מנוע התמונות גם כשהוא מסומן; אם לא נמצאו תמונות ומנוע תמונות מסומן, יש להפעיל מנוע תמונות כרגיל.
+- Implementation: נוספה תיבת סימון UI חדשה `ingFlagCheckLocalImagesFirst` (ברירת מחדל פעילה) במסוף ההזנה; הדגל מחובר ל-`runtime_flags.check_local_images_first` ב-frontend; ב-`server.py` הדגל מועבר ל-runner כ-CLI `--check-local-images-first`; ב-`update_products_batch_2.py` נוספה לוגיקת Local First לפי מיקום `C:\Temp\ProducsImages\<supplier_sku>` (עם fallback ל-`C:\TEMP\<supplier_sku>`) לפני העשרת תמונות אונליין; כאשר נמצאו קבצים מקומיים מנוע התמונות מנוטרל אפקטיבית למוצר; כאשר לא נמצאו וקיים סימון מנוע תמונות, המנוע ממשיך לפעול.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: code-path מאמת דגל UI -> API -> CLI -> runtime flags; העלאה ל-CMS משתמשת כעת גם בקבצים מהספרייה הראשית `C:\Temp\ProducsImages` ותומכת בהעלאת 5 הקבצים הראשונים גם אם שמותיהם אינם `1.webp..5.webp`.
+- Outcome: מסוף ההזנה נותן עדיפות לתמונות המקומיות ומדלג על מנוע תמונות אונליין כשיש חומר מקומי, תוך שמירה על fallback אונליין כשאין תמונות מקומיות.
+
+### [ID: 20260715-05] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: לייצב את הריצה לאחר שילוב חילוץ התמונות לספק חדש, כדי שהמסך לא ייתקע בגלל שגיאת סטטוס תהליך ברקע.
+- Implementation: תוקן `NameError: cursor is not defined` ב-`_refresh_current_process_state` על ידי הסרת בלוק SQL זר שנכנס לפונקציה בטעות וגרם לשגיאות בעת קריאת סטטוס תהליך (`/api/ingestion/status`); עודכנו גרסאות ריצה ל-API `0.72` ו-APP `1.10`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics נקיים; מסלול סטטוס תהליך נקרא ללא NameError; השרת מחזיר גרסת API מעודכנת.
+- Outcome: מסך חילוץ התמונות ושאר המסכים שתלויים בפולינג סטטוס יציבים לאחר השילוב.
+
+### [ID: 20260715-04] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: לשלב Helper חדש לחילוץ תמונות עבור הספק "צג עליתה" (מ-`C:\Projects\ElitaScraper`) ולהגדיר במערכת שלספק יש חילוץ תמונות פעיל; לחבר פרמטרים: דריסת שם, קוד מק"ט, שינוי רוחב ועוד.
+- Implementation: הוסף Extractor חדש בפרויקט `helper_scripts/image_extractors/elita_scraper.py` המבוסס על זרימת אליתה (חיפוש מוצר, כניסה לדף מוצר, איסוף גלריה, שמירה כ-WebP); הורחב `supplier_image_extraction_runner.py` לטעינה דינמית של סקריפט חילוץ לפי ספק מתוך `supplier_image_scripts.json` ולהעברת פרמטרים נתמכים (`overwrite_name`, `name_override`, `sku_override`, `resize_width`); עודכנו `server.py` ו-`app.js`/`index.html` כך שהפרמטרים מוזנים ב-UI ונשלחים ל-Job; הספק "צג עליתה" נרשם כ-Extractor פעיל ברשימות ברירת המחדל וגם בקובץ `supplier_image_scripts.json`.
+- Files changed: king_games_product_manager/helper_scripts/image_extractors/elita_scraper.py, king_games_product_manager/supplier_image_extraction_runner.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/supplier_image_scripts.json, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקות קוד והרצה מאמתות שהספק רשום עם סקריפט פעיל, שהפרמטרים עוברים מהמסך ל-API ול-Runner, ושגרסת הריצה עודכנה.
+- Outcome: "צג עליתה" זמין כעת לחילוץ תמונות במערכת עם תמיכה בפרמטרי דריסה/מקט/רוחב בתהליך ההרצה.
+
+### [ID: 20260715-03] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: ספק חדש עם מיפוי מחירון נתקע בקליטה עם שגיאה `Unsupported process_type 'manual_csv' for supplier ...` בזמן בדיקה מקדימה/Analyze.
+- Implementation: תוקן מסלול הקליטה ב-`/api/supplier/analyze` כך ש-`manual_csv` מזוהה כסוג תקין; כאשר הקלט הוא Excel ואין `csv_data`, המערכת נופלת אוטומטית לפענוח לפי מיפוי שמור (`_build_normalized_rows_from_excel_data`) במקום להחזיר `Unsupported process_type`; נוספה הודעת שגיאה ממוקדת רק אם אי אפשר לפענח מהקובץ לפי המיפוי.
+- Files changed: king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `/api/health/version` מחזיר כעת `api_version=0.70`; אין שגיאות diagnostics בקובץ השרת; נקודת הכשל `Unsupported process_type` לא תופעל עוד עבור `manual_csv`.
+- Outcome: קליטת ספקים חדשים עם `manual_csv` ומיפוי Excel לא אמורה להיתקע עוד על שגיאת process_type.
+
+### [ID: 20260715-02] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: להוסיף בדוח TASKEY מסנן סטטוס: הזמנות שמופיעות בקובץ לידים / לא מופיעות, עם סה"כ שמתעדכן לפי הסינון והחיפוש.
+- Implementation: נוספה בחירת סטטוס במסך הדוח (`הכל`, `מופיע בקובץ לידים`, `לא מופיע בקובץ לידים`); עודכנה טבלת הדוח להציג סטטוס לכל שורה בצבעים; עודכנה לוגיקת הסינון כך שמסנן סטטוס + חיפוש חופשי עובדים יחד; עודכן סיכום הדוח להציג סה"כ כולל, מופיעות, לא מופיעות, אחרי מסנן סטטוס, ומוצגות אחרי חיפוש.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: הדוח משתמש כעת בכל רשומות ההזמנות מה-API עם הדגל `נמצא בקובץ לידים`; המסנן והסיכומים מחושבים בלקוח בזמן אמת.
+- Outcome: ניתן לעבור מיידית בין "מופיעות בלידים" ל"לא מופיעות בלידים" ולקבל סה"כ מתרענן בהתאם.
+
+### [ID: 20260715-01] [Status: completed]
+- Timestamp: 2026-07-15
+- Request: להוסיף תחת דוחות דוח חדש "הצעות מול לידים ב TASKEY" שמביא הזמנות מתחילת החודש, משווה לטלפונים בקובץ `C:\Projects\TASKEYLEADSSCRAPTER\taskey_leads.csv` עם נרמול 972->0, ומציג אילו הזמנות לא מופיעות בקובץ הלידים.
+- Implementation: נוספו מסך ותפריט דוח חדש ב-UI; נוספה קריאת API חדשה `GET /api/sap/taskey-offers-vs-leads`; נוספה לוגיקת שרת להשוואת הזמנות SAP (`ORDR`) מול קובץ הלידים לפי טלפון מנורמל (כולל המרות `00972`/`972` ל-`0`); נוספו ב-UI חיפוש, סיכום, וטבלת "לא נמצא בקובץ לידים".
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקת קוד מלאה למסלול view->API->render; נוספו fallback-ים לטעינת CSV/JSON, זיהוי עמודת טלפון, וסיכומי counts.
+- Outcome: קיים כעת דוח ייעודי שמציג רק הזמנות מתחילת החודש שלא נמצאו בקובץ לידים של TASKEY.
+
+### [ID: 20260714-29] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: ערכי קטגוריות חזרו קרוב ל-0 והסינון תקף/לא תקף לא עבד במסך ניהול מוצרים.
+- Implementation: אותר כי רץ פרוסס ישן/שגוי של השרת שאינו כולל את שינויי API האחרונים (`valid_count`, `out_of_stock_count`, `valid_status`). בוצע ניקוי כל מאזיני פורט 8000 והרמה מחדש של `king_games_product_manager/server.py` המעודכן בלבד.
+- Files changed: LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `/api/categories` מחזיר כעת `valid_count` ו-`out_of_stock_count`; `/api/products?valid_status=valid` מחזיר `total=7686` עם `is_valid=1`; `/api/products?valid_status=invalid` מחזיר `total=18357` עם `is_valid=0`.
+- Outcome: מוני הקטגוריות והסינון תקף/לא תקף חזרו לעבוד בפועל לאחר העלאת השרת הנכון.
+
+### [ID: 20260714-28] [Status: completed]
+- Timestamp: 2026-07-14
+- Request: במסך ניהול מוצרים להוסיף חיתוך תקף/לא תקף כמו חיתוך מלאי, ובקומבו קטגוריה להציג כמה מוצרים בתוקף וכמה לא במלאי לכל קטגוריה.
+- Implementation: נוספה בחירת סינון תקפות ב-UI (`validFilter`) עם מצבים כללי/תקף/לא תקף; נוספה העברת פרמטר `valid_status` לקריאת `/api/products`; נוספה תמיכה בשרת בסינון `valid_status` לצד `stock_status`; הורחב `/api/categories` להחזיר לכל קטגוריה גם `valid_count` וגם `out_of_stock_count`; עודכנה תצוגת קומבו הקטגוריות במסך ניהול מוצרים לפורמט `שם קטגוריה (X בתוקף, Y לא במלאי)`.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics נקיים לקבצים ששונו; בדיקת קוד מאמתת חיבור מקצה לקצה בין פילטר התקפות ב-UI, פרמטר ה-API, וסינון SQL בצד השרת; קומבו הקטגוריות משתמש כעת במוני `valid_count` ו-`out_of_stock_count`.
+- Outcome: מסך ניהול מוצרים תומך כעת גם בסינון תקפות, ובקומבו קטגוריות מוצגים מוני תקף/לא במלאי לכל קטגוריה.
+
 ### [ID: 20260714-27] [Status: completed]
 - Timestamp: 2026-07-14
 - Request: complete failed preupload ingestion retry for pending products and stabilize CMS publish selectors after repeated no-such-element failures on save/image fields.

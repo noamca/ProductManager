@@ -1970,6 +1970,182 @@
 			],
 			"isBackground": true,
 			"group": "build"
+		},
+		{
+			"label": "kg-git-status-submodule",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git status --short; git rev-parse --abbrev-ref HEAD"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-git-status-root",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES'; git status --short; git rev-parse --abbrev-ref HEAD"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-commit-submodule-feature-scope",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git add app.js index.html server.py product_scraper_engine/enricher.py product_scraper_engine/selenium_fetcher.py update_products_batch_2.py title_header_rules.json; git commit -m \"Enforce supplier-first title lock and manufacturer format\"; git rev-parse --short HEAD"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-commit-submodule-feature-scope-v2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git commit -m 'Enforce_supplier_first_title_lock_and_manufacturer_format'; git rev-parse --short HEAD; git status --short"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-commit-root-pointer-history",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES'; git add king_games_product_manager LIVE_DEVELOPMENT_HISTORY.md LIVE_DEVELOPMENT_HISTORY.jsonl; git commit -m 'Update_submodule_pointer_and_live_history'; git rev-parse --short HEAD; git status --short"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-show-last-commits",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; Write-Output 'SUBMODULE'; git show --name-only --pretty=format:%H -1; Set-Location 'c:\\Projects\\KINGGAMES'; Write-Output 'ROOT'; git show --name-only --pretty=format:%H -1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-status-after-fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git status --short; Write-Output '---'; Set-Location 'c:\\Projects\\KINGGAMES'; git status --short"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-rerun-preupload-category-400-after-fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; c:/Projects/KINGGAMES/.venv/Scripts/python.exe -B update_products_batch_2.py category:400 --publish-to-mg --headless --skip-if-no-supplier-images"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-rerun-preupload-category-400-after-selector-fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; c:/Projects/KINGGAMES/.venv/Scripts/python.exe -B update_products_batch_2.py category:400 --publish-to-mg --headless --skip-if-no-supplier-images"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-rerun-preupload-category-400-after-save-fallback",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; c:/Projects/KINGGAMES/.venv/Scripts/python.exe -B update_products_batch_2.py category:400 --publish-to-mg --headless --skip-if-no-supplier-images"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-git-status-short-after-rerun-fixes",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git status --short update_products_batch_2.py app.js index.html server.py; Write-Output '---'; Set-Location 'c:\\Projects\\KINGGAMES'; git status --short LIVE_DEVELOPMENT_HISTORY.md LIVE_DEVELOPMENT_HISTORY.jsonl"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-commit-submodule-ingestion-selector-stability",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git add update_products_batch_2.py app.js index.html server.py; git commit -m \"Harden CMS publish selectors and clear pending preupload rerun\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-commit-submodule-ingestion-selector-stability-v2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git add update_products_batch_2.py app.js index.html server.py; git commit -m 'Harden CMS publish selectors and clear pending preupload rerun'"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-commit-submodule-ingestion-selector-stability-v3",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git add update_products_batch_2.py app.js index.html server.py; git commit -m Harden_CMS_publish_selectors_and_clear_pending_preupload_rerun; git rev-parse --short HEAD"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-commit-root-history-and-submodule-pointer",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES'; git add king_games_product_manager LIVE_DEVELOPMENT_HISTORY.md LIVE_DEVELOPMENT_HISTORY.jsonl; git commit -m Record_ingestion_selector_stability_and_pending_retry_completion; git rev-parse --short HEAD"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "kg-verify-post-commit-status-targeted",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git status --short update_products_batch_2.py app.js index.html server.py; Write-Output '---'; Set-Location 'c:\\Projects\\KINGGAMES'; git status --short LIVE_DEVELOPMENT_HISTORY.md LIVE_DEVELOPMENT_HISTORY.jsonl king_games_product_manager"
+			],
+			"isBackground": false
 		}
 	]
 }

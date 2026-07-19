@@ -7150,10 +7150,8 @@ if __name__ == "__main__":
     # Allow restarting server on same port immediately without waiting
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     
-    # Start daily CSV exporter background thread
-    t = threading.Thread(target=daily_exporter_loop, daemon=True)
-    t.start()
-    print("[Scheduler] Started daily CSV exporter thread.")
+    # Daily CSV exporter disabled on request; keep the function available for manual recovery only.
+    print("[Scheduler] Daily CSV exporter thread disabled.")
 
     t2 = threading.Thread(target=automated_processes_loop, daemon=True)
     t2.start()

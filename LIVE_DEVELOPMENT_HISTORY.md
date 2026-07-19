@@ -36,6 +36,406 @@ Policy: from now on, every requested change gets an entry.
 
 ## Entries
 
+### [ID: 20260719-19] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: לתקן שגיאת ChatGPT שבה מוצר `מארז HERO X WHITE` מזוהה/נדרש בטעות כ-CPU cooler, מה שיוצר דרישות סותרות ומונע JSON.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` שונתה קדימות זיהוי סוג מוצר כך שטוקנים מפורשים של מארז (`מארז`, `case`, `chassis`) מנצחים לפני רמזי `cpu_cooler` שגויים מקטגוריה/סוג מומלץ. נוסף זיהוי מוקדם ל-`case_fan` כדי לא לסווג מאוורר מארז כמארז מחשב. בדיקת התאמת `desktop` הורחבה להכיר כותרות מארז. גרסאות עודכנו ל-API/APP `1.36`/`1.74`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py` ו-`server.py`; smoke assertions אישרו ש-`מארז HERO X WHITE` מזוהה כ-`desktop`, ש-family guard מחזיר `generic` ולא `cpu_cooler`, וש-`מאוורר למארז` נשאר `case_fan`; diagnostics נקיים; השרת אותחל מחדש ו-health endpoint החזיר `api_version=1.36`; JSONL תקין.
+- Outcome: מוצרי מארז מפורשים כבר לא נשלחים ל-ChatGPT עם guardrail סותר של CPU cooler, ולכן לא אמורים לגרום לסירוב JSON מהסוג שהודבק.
+
+---
+
+### [ID: 20260719-18] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: להנחות את ChatGPT לענות מהר ולא לבצע מחקרים ארוכים, וללחוץ על כפתור `Answer now` אם הוא מופיע כדי להתחיל תשובה מיד.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` נוספו הנחיות browser-mode שמגבילות את ChatGPT ל-lookup קצר ומהיר במקום deep research/web browsing רחב. נוסף מנגנון שמזהה כפתור `Answer now` גלוי ולוחץ עליו אחרי שליחת ה-prompt ובזמן ההמתנה לתחילת תשובת assistant. גרסאות עודכנו ל-API/APP `1.35`/`1.73`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py` ו-`server.py`; diagnostics נקיים לקבצי Python/JS/HTML ששונו; השרת אותחל מחדש ו-health endpoint החזיר `api_version=1.35`; JSONL תקין.
+- Outcome: ChatGPT browser mode מבקש תשובה מהירה עם lookup מוגבל, ומנסה להפעיל `Answer now` אוטומטית כדי למנוע המתנה למחקרים ארוכים.
+
+---
+
+### [ID: 20260719-17] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: ChatGPT browser mode נכשל למוצר כמו `35737` עם `Timed out waiting for ChatGPT response text to finish generating and stabilize`, למרות שבפועל ChatGPT עונה בסוף לאט.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` הוארך זמן ההמתנה לתשובת ChatGPT מ-5 דקות ל-20 דקות, ונוסף heartbeat פעם בדקה שמדפיס כמה זמן עבר, כמה תווים התקבלו, והאם ChatGPT עדיין במצב generation. גרסאות עודכנו ל-API/APP `1.34`/`1.72`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py` ו-`server.py`; diagnostics נקיים לקבצי Python/JS/HTML ששונו; השרת אותחל מחדש ו-health endpoint החזיר `api_version=1.34`.
+- Outcome: Browser mode כבר לא מפיל תשובות ChatGPT איטיות אחרי 5 דקות; הוא ימתין עד 20 דקות ויראה לוג התקדמות בזמן ההמתנה.
+
+---
+
+### [ID: 20260719-16] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: לבטל את עיבוד הייצוא היומי שמדפיס `[Scheduler] Daily CSV export completed successfully`, כי לא ברור יותר למה נוצר הייצוא.
+- Implementation: בוטלה הפעלת `daily_exporter_loop` בעליית השרת ב-`king_games_product_manager/server.py` וב-`server.py`. הפונקציות `export_supplier_csv` ו-`daily_exporter_loop` נשארו בקוד לשחזור ידני בעתיד, אבל thread הרקע כבר לא מתחיל ולכן לא נכתב יותר `C:\TEMP\exp_sup.csv` אוטומטית. גרסאות עודכנו ל-API/APP `1.33`/`1.71`.
+- Files changed: king_games_product_manager/server.py, server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור שני קבצי `server.py`; diagnostics נקיים לקבצים ששונו; השרת הופעל מחדש וב-startup log הופיע `[Scheduler] Daily CSV exporter thread disabled.` במקום `Started daily CSV exporter thread`; health endpoint החזיר `api_version=1.33`.
+- Outcome: ייצוא ה-CSV היומי האוטומטי מבוטל. Scheduler התהליכים הכללי ו-importer של Product Agent ממשיכים לרוץ כרגיל.
+
+---
+
+### [ID: 20260719-15] [Status: blocked]
+- Timestamp: 2026-07-19
+- Request: להריץ שוב את מוצר `35734` אונליין ולוודא שיש פרדיקציה טובה לפני הודעת הצלחה.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` נוסף ל-browser mode לוג raw response לקובץ `product_scraper_engine/logs/chatgpt_browser_invalid_json.log`, ניסיון תיקון JSON דרך ChatGPT לאחר parse failure, קריאת טקסט תשובת ChatGPT דרך `innerText` ב-JavaScript כדי להימנע מתקיעות Selenium `.text`, ו-fast-fail ברור כש-ChatGPT נמצא במסך login/signup או human verification. גרסאות עודכנו ל-API/APP `1.27`/`1.65`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py` ו-`server.py`; diagnostics נקיים לקבצי Python/JS/HTML ששונו; השרת אותחל מחדש ונבדק ישירות עם `api_version=1.27`, PID `29268`. ריצת browser אמיתית על `35734` פתחה Chrome גלוי על `chrome-profile-chatgpt-visible` אך נכשלה ב-state `login_or_signup_screen`, ולכן לא ניתן היה לאמת ChatGPT online בלי התחברות ידנית. ריצות API חלופיות ל-`35734` נתקעו בקריאת AI/Phase-2 ונעצרו כדי לא להשאיר תהליכים תלויים.
+- Outcome: תיקוני עמידות ל-JSON/ChatGPT browser נמצאים בקוד ומופעלים ב-API `1.27`, אבל אימות אונליין מוצלח ל-`35734` עדיין חסום עד התחברות ידנית ל-ChatGPT בחלון Chrome הגלוי או עד ייצוב provider API.
+- Follow-ups: להתחבר ידנית ל-ChatGPT בפרופיל `chrome-profile-chatgpt-visible`, להריץ שוב `35734` עם `ai_provider=browser`, לוודא שנשמרות נקודות שיווקיות ושאין חסימת `missing_prediction_marketing_points`, ורק אז לסמן הצלחה.
+
+---
+
+### [ID: 20260719-14] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: במצב דפדפן ChatGPT, פרדיקציה למוצר `35734` (`DEEPCOOL CH560 DIGITAL WH`) החזירה סירוב במקום JSON כי הסוכן טען שאין לו מספיק נתונים/תמונות מאומתות.
+- Implementation: ב-`king_games_product_manager/product_scraper_engine/enricher.py` רוככה דרישת התמונות מ-`30-40` קשיח ליעד ריאלי של `6-12` URL מאומתים, עם הוראה לא לסרב לכל ה-JSON רק בגלל שאין מספיק תמונות ישירות. ב-`king_games_product_manager/update_products_batch_2.py` נוספו הוראות browser-mode מפורשות לשימוש ב-web lookup, אי-סירוב עקב חוסר נתונים ראשוני, וזיהוי refusal עם retry נוסף שמבקש JSON בלבד. גרסאות עודכנו ל-API/APP `1.24`/`1.62`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py`, `product_scraper_engine/enricher.py`, ו-`server.py`; diagnostics נקיים לקבצים ששונו; smoke אישר שה-prompt עבור `DEEPCOOL CH560 DIGITAL WH` כבר לא כולל `30-40 unique image URLs`, כולל את הוראת אי-הסירוב החדשה, וזיהוי refusal תופס את נוסח הסירוב שהתקבל מ-ChatGPT.
+- Outcome: ChatGPT browser mode אמור לבצע lookup ולהחזיר JSON גם כשהקלט הראשוני דל, במקום להחזיר הודעת סירוב טקסטואלית שמפילה את parser ה-JSON.
+
+### [ID: 20260719-13] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: בתהליך קליטת מחירון ספקים, לוודא שמוצרים מוכפלים במקדמים שנבחרו בסריקה הראשונית של הקטגוריות, ולהוסיף בטבלת "רשימת שורות מהקובץ לאחר מיפוי" עמודות נפרדות למכפיל האמיתי ולמכפיל המע"מ.
+- Implementation: ב-`king_games_product_manager/server.py` הורחבה התאמת `category_margin_overrides` כך שמקדם מהסריקה הראשונית יוחל גם לפי שם קטגוריה ראשית/משנית ולא רק לפי `category_key` מלא. נוספו לשורות ה-preview שדות `margin_multiplier` ו-`vat_multiplier` לצד `price_multiplier`. ב-`king_games_product_manager/app.js` נוספו עמודות `מכפיל אמיתי`, `מכפיל מע"מ`, ו-`מכפיל כולל` לטבלת שורות הקליטה. גרסאות עודכנו ל-API/APP `1.23`/`1.61`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `server.py`; diagnostics נקיים עבור `server.py`, `app.js`, ו-`index.html`; smoke ממוקד אישר שמקדם קטגוריה `1.45` ומע"מ `1.18` מחושבים למכפיל כולל `1.711` ולמחיר מחושב תקין.
+- Outcome: מקדמים שנבחרו בסריקה הראשונית מוחלים בפועל על השורות, והטבלה מציגה בנפרד את מקדם הרווח, מקדם המע"מ, והמכפיל הכולל.
+
+### [ID: 20260719-12] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: כשבוחרים מצב דפדפן ל-ChatGPT, לפתוח דפדפן נראה כדי שיהיה אפשר לראות מה קורה במקום להתחבר למופע headless.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` נוסף זיהוי של ה-PID שמאזין על port `9222`, קריאת command line שלו, והחלפה אוטומטית אם הוא רץ עם `--headless` או פרופיל `chrome-profile-headless`. פתיחת Chrome במצב browser כוללת כעת `--new-window`, `--start-maximized`, ו-`--no-first-run`. גרסאות עודכנו ל-API/APP `1.22`/`1.60`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py` ו-`server.py`; diagnostics נקיים לקבצי Python/JS/HTML ששונו; probe מול 9222 החזיר `PID=27856`, `HEADLESS=False`, `ENSURE_VISIBLE=True` עם command line של Chrome נראה על `chrome-profile-chatgpt-visible`; לאחר restart, `/api/health/version` החזיר `api_version=1.22` ומאזינים פעילים יחידים על 8000 ו-9222.
+- Outcome: בחירת מצב דפדפן כבר לא תישען על מופע debug headless קיים; אם 9222 תפוס על ידי headless, הוא יוחלף בחלון Chrome נראה.
+
+### [ID: 20260719-11] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: תיקון תקיעה בלולאת כתיבה ל-ChatGPT בדפדפן, שבה `safe_write_to_prompt` נכשל שוב ושוב עם stacktrace של chromedriver.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` הוקשח מנגנון כתיבת prompt ל-ChatGPT: נוספו selectors ל-`textarea`, `contenteditable`, ו-ProseMirror; נוספה כתיבה לפי סוג אלמנט עם `InputEvent`; נוסף fallback להדבקה דרך clipboard; ה-retry צומצם ל-3 ניסיונות עם הודעת שגיאה קצרה וברורה במקום stacktrace ארוך. גרסאות עודכנו ל-API/APP `1.21`/`1.59`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics וקומפילציה ממוקדת עברו לאחר התיקון. Probe מול Chrome debug קיים החזיר `url=https://chatgpt.com/; title=רק רגע...; state=prompt_not_visible` ו-`CANDIDATES=0`, כלומר כעת המערכת תדווח במפורש שתיבת ChatGPT לא זמינה במקום להמשיך בלופ.
+- Outcome: מצב דפדפן ChatGPT כבר לא אמור להיתקע בלולאת כתיבה רעשנית; אם תיבת ההודעה לא זמינה, תתקבל שגיאה קצרה שמכוונת לבדוק login/visibility.
+
+### [ID: 20260719-10] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: לאפשר ל-Enrichment לעבוד או דרך API עם מפתח או דרך דפדפן רגיל מול ChatGPT, עם אותו JSON format בשתי קריאות ה-AI.
+- Implementation: נוספה בחירת provider במסוף ההזנה (`api`/`browser`). ה-UI מעביר `ai_provider`, השרת מעביר `--ai-provider`, ו-`update_products_batch_2.py` מפעיל את שתי קריאות ה-enrichment דרך API או דרך ChatGPT בדפדפן לפי הבחירה. מסלול הדפדפן משתמש באותו prompt, מחייב `JSON only`, מפענח דרך אותו parser/decode של מנוע Gemini, ומחזיר אותו מבנה downstream. גם בדיקת title essence עוברת לדפדפן כשנבחר provider browser. גרסאות עודכנו ל-API/APP `1.20`/`1.58`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בוצעו diagnostics וקומפילציה ממוקדת לאחר העריכה; בנוסף בוצע smoke ללא רשת עם `browser_json_callable` מזויף שמוודא ש-`enrich_single_product(..., ai_provider="browser")` מקבל ומחזיר את אותו מבנה JSON downstream עם `VALIDATION_OK`.
+- Outcome: ניתן לבחור אם סוכן ה-AI ירוץ דרך API פנימי או דרך ChatGPT בדפדפן, בלי לשנות את פורמט ה-JSON שהמשך המערכת מקבל.
+
+### [ID: 20260719-09] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: מוצר 35735 קיבל כותרת מקור/AI של מארז DeepCool CG580 אך `Title Guard` תיקן אותו בטעות ל-`cpu_cooler`, נחסם ב-Gemini Guard, ולא פורסם.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` הוקשחה הסקת משפחת כותרת כך שטיפוס מפורש מתוך `PRODUCT_NAME`/`FORMATTED_TITLE`/recommended type גובר על קטגוריית DB ישנה לפני הפעלת תיקון קירור. בנוסף זוהו דגמי DeepCool `CG` כמארזים לצד `CH`, כולל override קטגוריה ל-147 ונרמול כותרות CG מזוהמות. גרסאות עודכנו ל-API/APP `1.19`/`1.57`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: לאחר העריכה בוצעה בדיקת syntax/guard ממוקדת.
+- Outcome: כותרות מארז מפורשות כמו `מארז מחשב פנורמי DeepCool CG580 4F V2 WH` כבר לא אמורות לעבור תיקון משפחה ל-`קירור למעבד` גם אם הקטגוריה הקודמת הייתה 149.
+
+### [ID: 20260719-08] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: אם לא התקבלו נקודות שיווקיות בפרדיקציה, לעצור את העלאה ל-MG/לאתר, לרשום לוג של היעדר פרדיקציה, ולהמשיך למוצר הבא.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` נוסף gate קשיח שמזהה פרדיקציה ללא `PRODUCT_FACTS` ומפסיק את הזרימה לפני publish, עם `insert_product_error(..., "missing_prediction_marketing_points", ...)` ולוג ברור. אותו gate נוסף גם למסלול publish מתוך payload שמור, כדי שלא יתבצע fallback שקט לנקודות ריקות.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: לא בוצע עדיין לאחר העריכה; נדרש להריץ בדיקת syntax/flow ממוקדת על `update_products_batch_2.py`.
+- Outcome: מוצרים ללא נקודות שיווקיות לא יעלו יותר לאתר, והריצה תמשיך אוטומטית למוצר הבא עם לוג ייעודי.
+
+### [ID: 20260719-07] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: להכין תיעוד מדויק ומפורט של מנגנון הפרדיקציה שורה-שורה, ולשמור בקובץ `PREDICTION.MD`.
+- Implementation: נכתב מסמך חדש `PREDICTION.MD` בשורש הפרויקט עם פירוט מלא של זרימת הפרדיקציה בפועל: bootstrap, flags, Phase-1 category lock, Phase-2 AI enrichment, title/attribute guards, HTML/content materialization, DB persistence, publish-to-MG path, retries/logging, ושדות מטא/פלט מרכזיים.
+- Files changed: PREDICTION.MD, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: המסמך נוצר בפועל בנתיב `PREDICTION.MD` ומכסה את שני נתיבי הקוד המרכזיים (`update_products_batch_2.py` ו-`product_scraper_engine/enricher.py`) כולל סדר ביצוע, תופעות זמן ריצה, ולוגים.
+- Outcome: קיים כעת תיעוד תפעולי מלא ועדכני של מנגנון הפרדיקציה לשימוש צוות הפיתוח/תפעול.
+
+### [ID: 20260719-06] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: לתקן בפועל באתר את מוצר 35730 שכבר פורסם לא נכון, כך שיישמר ב-MG עם קטגוריית מארז (147) ומאפיינים/תמונות תואמים.
+- Implementation: בוצעה ריצת publish ייעודית עם `--publish-to-mg` עבור 35730 אחרי תיקון override; ה-payload שנשלח ל-MG כלל `category=147`, `categories=[147]`, סט פרמטרים `param_*` של קטגוריית מארז, ותמונות `image1..image5` מ-`C:\Temp\ProducsImages\210087`.
+- Files changed: LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: הלוג `scratch/publish_35730_category147_fix.log` מאשר `Title-based override: 149 -> 147`, `Locked category from 409 to 147`, עדכון שדות `param_*`, `category`, `categories`, ותוצאה סופית `Product updated successfully! Final URL: https://www.king-games.co.il/apanel/products&edit=35730`.
+- Outcome: מוצר 35730 תוקן בלייב ב-MG למסלול מארזי מחשב (147) עם מאפיינים ותמונות תואמים, ללא מסלול קירור שגוי.
+
+### [ID: 20260719-05] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: לתקן סופית את מקרה 35730 כך שלא יישאר בקטגוריית 409 (מוצרים חדשים) ולא יקבל סכמת קירור; לאמת בהרצה חיה מלאה.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` תוקן יעד override למארזים מתוך `_infer_explicit_category_from_title()` מ-`409` ל-`147`, וב-`infer_product_type_for_engine()` נוסף מיפוי `147 -> desktop`. הועלו גרסאות ל-API/APP `1.16`/`1.54` ב-`king_games_product_manager/server.py` ו-`king_games_product_manager/app.js`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: ריצה ממוקדת חדשה על 35730 (`scratch/verify_35730_category147_fix_rerun2.log`) מאשרת: `Title-based override: 149 -> 147`, `Locked category from 409 to 147`, `Gemini Guard][OK`, `RECOMMENDED_CATEGORY_ID: 147`, `RECOMMENDED_PRODUCT_TYPE: desktop`, וללא `Gemini Guard][Block` או זליגה ל-`cpu_cooler`.
+- Outcome: מוצר 35730 מטופל כעת כמארז מחשב בקטגוריה 147 עם סכמת מאפיינים מתאימה, במקום קטגוריית 409/סכמת קירור.
+
+### [ID: 20260719-04] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: מוצר 35730 עדיין קיבל פרדיקציית קירור שגויה למרות שהוא מארז; נדרש לתקן גם מצב שבו הכותרת ב-DB כבר הורעלה לרמזי קירור.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` נוספו 3 שכבות הגנה: (1) `_infer_explicit_category_from_title()` מחזיר `409` עבור דפוסי מארז (`מארז/case/chassis` וגם `CH\d+`), (2) `_title_has_cpu_cooler_markers()` + guard שמונע נעילת קטגוריה 149 כשאין סימני קירור מפורשים בכותרת, (3) `_normalize_obvious_misclassified_case_title()` שמנרמל לפני Phase-1 כותרת "מורעלת" של DeepCool CH-series חזרה ל-`DEEPCOOL CH690 DIGITAL WH`. בנוסף `infer_product_type_for_engine` מזהה `409` כ-`desktop`. גרסאות הועלו ל-API/APP `1.15`/`1.53`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: ריצה חיה על 35730 (`scratch/verify_35730_family_fix_v3.log`) הראתה normalization לקלט, override לקטגוריה 409, כותרת סופית "מארז מחשב...", ו-`[Gemini Guard][OK]` בלי `Block`.
+- Outcome: מסלול 35730 לא נשאב יותר למסלול קירור; זיהוי מארז נשמר גם כשהכותרת המקומית כבר הושחתה קודם.
+
+### [ID: 20260719-03] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: מוצר 35730 (מארז) הוסט בטעות ע"י `Title Guard` למשפחת `cpu_cooler` ונחסם ב-`Gemini Guard`.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` הוקדמה קדימות זיהוי משפחה מתוך `base_title` לפני מיפוי לפי קטגוריה, כך שכותרת מפורשת (למשל "מארז"/"ספק כוח") גוברת על קטגוריה שגויה; בנוסף נוספה תמיכה מפורשת ב-`מארז/case/chassis` בתוך `_infer_explicit_product_type_from_title`, וטיפוסים מפורשים לא-CPU (`desktop/laptop/monitor`) ממופים ל-`generic` כדי לא להיכנס למסלול תיקון קירור. גרסאות הועלו ל-API/APP `1.14`/`1.52`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics נקיים; הרצה ממוקדת ל-35730 לא אמורה יותר לייצר `title_guard_corrected` למשפחת `cpu_cooler` כאשר הכותרת מצביעה על מארז.
+- Outcome: `Title Guard` לא יהפוך עוד מוצרי מארז/PSU לכותרות קירור רק בגלל הקשר/קטגוריה שגויים.
+
+### [ID: 20260719-02] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: בתרחיש מוצר 35729 (ספק כוח) `Title Guard` המיר בטעות את הכותרת למשפחת `cpu_cooler` וחסם/עיוות את הפרדיקציה.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` הוקשחה הסקת `title family`: נוספה מפה ישירה `146 -> psu`, נוספה קדימות קשיחה לזיהוי מפורש מתוך `base_title` (`_infer_explicit_product_type_from_title`) לפני הסקה מהקשר רחב, ונוספה ולידציה ייעודית למשפחת `psu` ב-`_is_title_valid_for_family()` כדי למנוע זליגה לכותרות קירור. גרסאות הועלו ל-API/APP `1.13`/`1.51`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics נקיים; נתיב ההסקה כעת מחזיר `psu` עבור כותרות עם "ספק כוח/ספק כח" גם אם ההקשר כולל מילים מטעות.
+- Outcome: מוצרי ספק כוח לא יעברו יותר "תיקון" לכיוון `קירור למעבד` ע"י Title Guard.
+
+### [ID: 20260719-01] [Status: completed]
+- Timestamp: 2026-07-19
+- Request: במקרה `title_guard_blocked` (כמו מוצר 35726) לא לעצור פרדיקציה; רק לרשום לוג ולהמשיך רגיל.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` שונה הענף של `if not title_guard_ok` ממצב חוסם למצב אזהרה בלבד: הודעת לוג עודכנה ל-`[Title Guard][Warn] ... continuing prediction flow as requested`, נשמר `insert_product_error(..., "title_guard_blocked", ...)`, והוסרו `failed_list.append(...)` + `continue`, כך שהזרימה ממשיכה ליצירת `PRODUCT_NAME/FORMATTED_TITLE` ולהמשך הפרדיקציה/פרסום. גרסאות הועלו ל-API/APP `1.12`/`1.50`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקת diagnostics לקבצים ששונו ללא שגיאות.
+- Outcome: `title_guard_blocked` הוא כעת log-only ואינו מפיל יותר את עיבוד המוצר.
+
+### [ID: 20260717-12] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: לעצור סופית מקרה שבו `Title Rules` מרנדרים כותרת ממשפחה אחרת (למשל מסך) מעל כותרת AI למוצר ספק כוח.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` הוקשחה לוגיקת בחירת כותרת: כאשר קיימת `ai_formatted_title`, היא כעת authoritative ותמיד נשמרת. `rendered_title` נדחה לוגית אם שונה (עם לוג `[Title Rules][Reject Rendered]`). `rendered_title` משמש רק כשאין כותרת AI בכלל.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: הרצה ממוקדת על 35723 אמורה להציג Reject Rendered במקום Guardrail override; Publish עדיין נחסם ע"י Gemini mismatch guard אם יש סטייה סמנטית.
+- Outcome: אין יותר override מקומי של כותרת AI על ידי Template Rules; נמנעת זליגה ממשפחת מוצר שגויה דרך renderer.
+
+### [ID: 20260717-11] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: בריצה על 35723 הופיעה כותרת מרונדרת שגויה (`מסך גיימינג...`) למרות שמדובר בספק כוח; נדרש לעצור override שגוי של Title Rules.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` נוספה פונקציית התאמה `_title_matches_expected_product_type()` (PSU/cooler/cpu/monitor/laptop/desktop). בלוגיקת `Title Rules` אם `rendered_title` שונה מ-`ai_formatted_title`, כעת היא תאומץ רק אם היא תואמת את סוג המוצר הצפוי; אחרת היא נדחית ונשמרת כותרת ה-AI. כך נמנע override מקומי שגוי כמו PSU->monitor. גרסאות הועלו ל-API/APP `1.10`/`1.48`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקה סטטית נקייה לקבצים ששונו; לפי זרימת הקוד כותרת מרונדרת שלא תואמת סוג מוצר לא תחליף יותר את כותרת ה-AI.
+- Outcome: כותרות מקומיות מרונדרות לא יגררו יותר מהות מוצר שגויה (למשל מסך/קירור במקום ספק כוח) כשהכותרת המקורית מצביעה אחרת.
+
+### [ID: 20260717-10] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: לאחר הרצה יחידנית על 35723 עדיין התקבלה אזהרת `title_essence_mismatch` עם סיווג קירור במקום ספק; נדרש למנוע זאת קשיח ולהפסיק Publish במוצר שנכשל guard.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` הוחמרו guards: (1) override קטגוריה מבוסס כותרת כבר לא תלוי ב-`ALLOWED_CATEGORY_IDS` (כדי שלא יידחה ספק כוח רק כי רשימת leaf קטגוריות חסרה); (2) נוסף guard משפחה קשיח שמונע קטגוריית קירור (`149`) כאשר הכותרת מצביעה על PSU, ומאלץ fallback לקטגוריה מפורשת/מקורית; (3) נוספה קבוצה גלובלית `BLOCK_PUBLISH_PRODUCT_IDS` כך שמוצר שנכשל `Gemini guard` (mismatch/connectivity) נחסם גם משלב publish באותה ריצה ולא ממשיך עם payload ישן. גרסאות הועלו ל-API/APP `1.09`/`1.47`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: אימות לוגי של נתיב 35723: זוהה root cause קודם (`category 149` למרות שם PSU), ותיקון guards מונע נעילה זו ומונע publish כאשר Gemini mismatch מזוהה.
+- Outcome: לא אמור יותר לקרות מצב שבו שם ספק כוח עובר ל-Gemini תחת מסלול קירור; ובכשל guard המוצר לא יפורסם באותה ריצה.
+
+### [ID: 20260717-09] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: בהרצה יחידנית מתקבלת שגיאה: `can't open file 'C:\\Projects\\KINGGAMES\\update_products_batch_2.py'`.
+- Implementation: ב-`king_games_product_manager/server.py` תוקן `start_ingestion` כך שההרצה משתמשת בנתיב מוחלט ל-`update_products_batch_2.py` דרך `os.path.join(BASE_DIR, ...)` ובנוסף `subprocess.Popen(..., cwd=BASE_DIR)` כדי לבטל תלות בתיקיית ההפעלה של השרת. הועלו גרסאות ל-API/APP `1.08`/`1.46`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקה סטטית על הקבצים ששונו ללא שגיאות; לוגיקת יצירת הפקודה בהרצה יחידנית/טווח כבר לא תלויה ב-cwd חיצוני.
+- Outcome: הזנת מוצרים (יחידני וטווח) אמורה להיפתח תמיד מהנתיב הנכון של `king_games_product_manager/update_products_batch_2.py`.
+
+### [ID: 20260717-08] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: אחרי ריצת טווח 35701-35750, מוצר 35720 (ספק כוח) הועבר כמו קירור למעבד; לבדוק לוגים, למצוא שורש, ולהקשיח כולל דילוג כשאין קשר ל-Gemini ובדיקת התאמה בין שם מקור לשם פרדיקציה.
+- Implementation: בוצעה חקירת לוגים שהראתה כי עבור 35720 נשלח ל-Gemini `Product Type: cpu_cooler` למרות ששם המקור הוא ספק כוח. ב-`king_games_product_manager/update_products_batch_2.py` הוספתי זיהוי סוג מוצר מפורש מהכותרת (`_infer_explicit_product_type_from_title`) עם עדיפות לשם המקור על פני קטגוריה (כולל `psu/power supply/ספק כוח`) ותוקן `infer_product_type_for_engine()` לעבוד title-first. בנוסף הוסף Guard חדש אחרי יצירת כותרת: קריאה נוספת ל-Gemini להשוואת מהות בין `original_title` ל-`predicted_title`; אם אין קישוריות ל-Gemini נרשם לוג/שגיאה ומדלגים למוצר הבא, ואם יש אי-התאמה מהותית המוצר נחסם. ב-`product_scraper_engine/enricher.py` נוספו `compare_title_essence_with_gemini()` ולוג קישוריות ייעודי `product_scraper_engine/logs/gemini_connectivity.log`. גרסאות הועלו ל-API/APP `1.07`/`1.45`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: אימות לוגים הראה ב-35720 את מקור הכשל (`Input Product Name=ספק כוח` יחד עם `Product Type=cpu_cooler`). לאחר שינוי הקוד בוצעה בדיקת שגיאות סטטית ללא שגיאות בקבצים ששונו.
+- Outcome: התוכנית מוקשחת נגד זליגת family שגויה; ספקי כוח לא אמורים להישלח יותר כ-cpu_cooler, ובכשל קישוריות ל-Gemini Guard המוצר מדולג אוטומטית עם לוג מסודר.
+
+### [ID: 20260717-07] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: טווח מוצרים חייב לעבוד בדיוק כמו יחידני אחד-אחד; בפועל אחרי ריצה 35700-35705 לא התעדכן valid/עדכון.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` הוספתי מצב קשיח לטווח/רשימה ידנית: `is_manual_multi_mode()` + `run_manual_mode_as_strict_single()`. כאשר הקלט הוא multi-ID ידני, הסקריפט מפעיל תתי-ריצות יחידניות לכל מזהה בתורו, עם אותם runtime flags בדיוק, כולל `publish_to_mg`. בכל איטרציה מוחלף רק `mode` ל-ID בודד ונשמרת כל שאר הקונפיגורציה, כך שההתנהגות זהה ליחידני. הועלו גרסאות ל-API/APP `1.06`/`1.44`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: לוגיקה נבדקה סטטית: ב-mode ידני multi הסקריפט נכנס ל-`Strict single iteration mode` ומריץ כל מוצר כתת-ריצת יחידני מלאה; עבור single/category/all אין שינוי התנהגות.
+- Outcome: מסלול טווח ידני רץ מעכשיו כשרשרת ריצות יחידניות אמיתיות מוצר-אחר-מוצר, ללא סטייה לוגית מהמסלול היחידני.
+
+### [ID: 20260717-06] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: אני מעוניין שבהזנה של טווח מוצרים זה יעבוד בדיוק אותו דבר כמו יחידני על טווח המוצרים אחד לאחד.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` אוחדה לוגיקת parsing של mode ידני (single/range/list) כך שתתנהג כמו ריצה יחידנית לכל מוצר: נוספה תמיכה בטוקנים מופרדים בפסיקים/רווחים/שורות/נקודה-פסיק, תמיכה בטווחים מספריים עם `-`/`–`/`—`, ורזולוציה לכל טוקן דרך `resolve_input_to_mg_id()` (כולל SKU/SAP ולא רק מספרים). בנוסף נוספו לוגים ברורים לטוקנים שלא נפתרו. גרסאות הועלו ל-API/APP `1.05`/`1.43`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בוצעה בדיקת קוד סטטית של נתיב `select_product_ids` לאחר התיקון, עם שמירה על דה-דופליקציה וסדר ריצה מוצר-מוצר; נוספה נראות לוגית ל-`[ID Mapping] Unresolved manual inputs` לצורכי דיבוג.
+- Outcome: הזנת טווח/רשימה עובדת באותה צורת פירוק-לקלט-בודד כמו יחידני, כולל קלטים מעורבים ורזולוציה עקבית ל-MG ID.
+
+### [ID: 20260717-05] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: להפסיק באופן סדור וקשיח מקרים שבהם שם המוצר נהרס בפרדיקציה, במיוחד טעויות קריטיות כמו קירור למעבד שמקבל שם של מעבד (למשל 35695 `מעבד סוג B5 תושבת אפור`).
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` הוטמעה שכבת governance מלאה על כותרת המוצר: נוספו `TITLE_FAMILY_BY_CATEGORY`, זיהוי family לפי קטגוריה/הקשר, builder דטרמיניסטי לשם קירור CPU, ו-`_enforce_final_title_family_guard()` שרץ אחרי `apply_title_rule_template()` ולפני save/publish. בנוסף, `infer_product_type_for_engine()` ממפה כעת קטגוריה 149 ל-`cpu_cooler` (וגם 142/264 ל-`cpu`/`case_fan`), וב-`title_header_rules.json` נוסף כלל title ייעודי `קירור למעבד` עם template מתאים. אם שם סופי לא עומד בבקרת המשפחה, הוא מתוקן אוטומטית; ואם עדיין לא חוקי, הריצה נחסמת עם `title_guard_blocked`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/title_header_rules.json, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke test על הארטיפקטים האמיתיים של 35695 ו-35693 אישר rendering דרך rule `קירור למעבד` עם פלטים: `קירור אקטיבי למעבד Dynatron B5 LGA 3647 אפור` ו-`קירור אקטיבי למעבד Dynatron Q7 LGA 1851 אפור`. `guard_ok=true` בשני המקרים ו-`VALIDATION_OK`. diagnostics נקיים.
+- Outcome: שם המוצר כבר לא נשאר שדה best-effort; יש עכשיו בקרת family מקומית שמתקנת או חוסמת שמות שגויים לפני DB ו-MG publish, ובפרט מונעת זליגה מ"קירור למעבד" ל"מעבד".
+
+### [ID: 20260717-04] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: בתהליך שמנרמל תמונות מקומיות ל-`1,2,3...` עבור העלאה ל-MG, להוסיף גם כיווץ קשיח כך שאף תמונה לא תועלה אם גודלה מעל 350KB.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` נוספה אכיפת `MG_MAX_IMAGE_UPLOAD_KB = 349` במסלול התמונות המקומיות. `_normalize_local_image_filenames()` כבר לא רק ממספר קבצים, אלא מכין אותם להעלאה ל-MG דרך `_compress_image_to_mg_limit()` ו-`_enforce_mg_image_limits_for_files()`: הקבצים מומרצים ל-`1.webp`, `2.webp` וכו', עם הורדת quality ו-resize מדורג עד שהגודל יורד מתחת לרף. בנוסף נסגר נתיב fallback שעלול היה להחזיר קבצים מקוריים גדולים מדי אם הכנת ה-WebP נכשלה; במצב כזה התמונות לא יחזרו למסלול upload בכלל.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke test יצר תמונת מקור בגודל `1,214,710` bytes, והכנת התמונות ל-MG הפיקה `1.webp` בגודל `173,610` bytes (`169.5KB`) עם `VALIDATION_OK`. אימות נוסף הראה שהספרייה הזמנית מכילה רק `1.webp` בגודל המופחת. diagnostics נקיים.
+- Outcome: כל תמונה מקומית שמועברת ל-MG מוכנה עכשיו מראש בפורמט ממוספר ובמשקל שמתחת למגבלת 350KB; קובץ שלא ניתן להכין כחוק לא יישלח ל-upload.
+
+### [ID: 20260717-03] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: לתקן מקרה שבו מוצר קירור למעבד (35693) קיבל שם שגוי כמו `מעבד סוג Q7 אפור` למרות שכל ההקשר מצביע על גוף קירור/מאוורר למעבד.
+- Implementation: ב-`king_games_product_manager/product_scraper_engine/enricher.py` נוספו: זיהוי משפחת מוצר (`_detect_product_family`) עם זיהוי ייעודי ל-CPU cooler, guardrails חדשים ב-prompt שמכריחים את Gemini לתאר מוצרי קירור כקירור/גוף קירור ולא כמעבד, ו-postprocess (`_enforce_product_family_naming`) שמתקן `PRODUCT_NAME` ו-`FORMATTED_TITLE` אם Gemini עדיין מחזיר שם שנראה כמו מעבד. עבור קירורי CPU נבנה fallback category-aware מתוך שם המקור, היצרן, המודל, התאמת socket וצבע. הועלו גרסאות ל-API/APP `1.02`/`1.40`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke test עם `DYNATRON Q7 LGA 1851/1700 1U ACTIVE COOLER` זיהה משפחה `cpu_cooler` ותיקן את השם מ-`מעבד סוג Q7 אפור` ל-`קירור אקטיבי למעבד Dynatron Q7 LGA 1851/1700 אפור` (`VALIDATION_OK`). אורך השם נבדק ונשאר 49 תווים. diagnostics נקיים.
+- Outcome: מוצרי קירור למעבד לא יקבלו יותר שמות של מעבדים גם כאשר `Product Type` מגיע כ-`unknown` או כשחסר title rule ייעודי לקירור.
+
+### [ID: 20260717-02] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: למנוע שבירת JSON מתשובת Gemini בגלל מפתחות/ערכים עם מירכאות, למשל `גודל מאוורר בס"מ`, ע"י מעבר ל-URLENCODING במאפיינים ובערכים הרגישים.
+- Implementation: ב-`king_games_product_manager/product_scraper_engine/enricher.py` הוחלף החוזה מול Gemini עבור `PRODUCT_TECHNICAL_DETAILS`, `PRODUCT_ATTRIBUTES` ו-`RECOMMENDED_CATEGORY_ATTRIBUTES`: נוספו helperים ל-URL encode/decode, ה-prompt מציג מפות `original -> encoded`, ה-response schema דורש מפתחות URL-encoded לשדות הרגישים, והתגובה מפוענחת חזרה אוטומטית לשמות/ערכים המקוריים אחרי ה-parse. בנוסף תוקן bug מקומי ב-`build_prompt` שבו `category_attributes_codes_block` לא אותחל/הוזח נכון. הועלו גרסאות ל-API/APP `1.01`/`1.39`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke test ייעודי אישר round-trip מלא של מפתח בעייתי `גודל מאוורר בס"מ` וערכים עם `"` דרך encode/decode, כולל `RECOMMENDED_CATEGORY_ATTRIBUTES`, עם פלט `VALIDATION_OK`. בדיקת diagnostics נקייה.
+- Outcome: Gemini כבר לא נדרש להחזיר מפתחות/ערכים גולמיים עם מירכאות בשדות הרגישים; המבנה נשאר JSON תקין והמערכת מפענחת חזרה לשמות המקוריים לשאר הזרימה.
+
+### [ID: 20260717-01] [Status: completed]
+- Timestamp: 2026-07-17
+- Request: כאשר מופיעה האזהרה `Warning: Gemini returned invalid JSON`, לשמור בלוג של מה שהתקבל בפועל מגמיני כדי לראות את ה-raw response.
+- Implementation: ב-`king_games_product_manager/product_scraper_engine/enricher.py` נוספה כתיבה לקובץ לוג ייעודי `product_scraper_engine/logs/gemini_invalid_json.log` בכל `JSONDecodeError` מתשובת Gemini. הלוג כולל timestamp, model, attempt, שורת/עמודת השגיאה, ואת `raw_response` המלא כפי שחזר מהמודל. הודעת האזהרה ב-stderr עודכנה כך שתדפיס גם את נתיב קובץ הלוג.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בוצעה בדיקת smoke ייעודית שיצרה קובץ לוג ונקרא ממנו התוכן המאומת: `raw_response` נשמר במלואו יחד עם metadata של השגיאה.
+- Outcome: כל אזהרת `Gemini returned invalid JSON` מייצרת מעכשיו לוג קריא עם הטקסט הגולמי שקיבלנו מגמיני.
+
+### [ID: 20260716-19] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: תיקון קריסה ב-Local Enrichment על מוצר 35692 עם שגיאת JSON parse (`Expecting ':' delimiter`) מתשובת Gemini.
+- Implementation: ב-`king_games_product_manager/product_scraper_engine/enricher.py` הוספנו שכבת parsing קשיחה לתשובת Gemini (`_parse_gemini_json_text`) שכוללת: הסרת markdown code fences, חילוץ אובייקט JSON מתוך טקסט מעורב, ותיקון פסיקים נגררים לפני `}`/`]`. בנוסף, `call_gemini_api` עודכן ל-retry ייעודי על `JSONDecodeError` וחריגות מבנה תשובה (`KeyError/IndexError/TypeError`) במקום כשל מיידי.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקת parser חיה עם 4 תרחישים (JSON תקין, fenced JSON, trailing comma, וטקסט מעורב עם JSON) עברה בהצלחה והחזירה אובייקטים תקינים בכל המקרים. בדיקת diagnostics: ללא שגיאות בקבצים ששונו.
+- Outcome: כשלי פורמט קלים בתשובת Gemini לא מפילים יותר את שלב ה-enrichment; המערכת מנסה לתקן/לפרש ומבצעת retry לפני כישלון סופי.
+
+### [ID: 20260716-18] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: לתקן את מנגנון ה-Force Overrides כך שהפורמט `--param_1:...` באמת ידרוס ערכים מהפרדיקציה (ולא יעבור עם הערך הישן).
+- Implementation: ב-`update_products_batch_2.py` תוקן parser ה-overrides: נוספה נרמול מפתחות שמסירה קידומת `--` ותומכת גם בכתיב עם מקף (`param-1`/`icon-34`) בנוסף לכתיב עם underscore; כך שורות כמו `--param_1:...`, `--icon-34`, `--no-icon-35` מפוענחות ונאכפות על ה-payload לפני שליחה למודול MG. הועלו גרסאות ל-API/APP `0.98`/`1.36`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקת parser חיה עם הטקסט:
+	`--param_1:12 חודשי אחריות ע"י רשת קינג גיימס`
+	`--icon-34`
+	`--no-icon-35`
+	`param_2=@3`
+	החזירה: `param_1` עם הערך הטקסטואלי החדש, `icon_34=True`, `icon_35=False`, ו-`param_2` כאינדקס 3.
+- Outcome: הפורמט שכתבת עכשיו נתמך ישירות, והערכים שלך דורסים בפועל את ערכי הפרדיקציה.
+
+### [ID: 20260716-17] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: לאפשר "הזרקה"/אכיפה של פרמטרים שנשלחים למודול MG בלי תלות בפרדיקציה (לדוגמה: `param_1` לבחור תמיד אופציה 4, `icon_34` מסומן, `icon_17` לא מסומן).
+- Implementation: הוטמעה תיבת טקסט חדשה במסוף ההזנה (`ingMgForceOverrides`) להגדרת Overrides קשיחים; הערך מועבר ב-`runtime_flags` לשרת ומשם ל-CLI של `update_products_batch_2.py` דרך `--mg-force-overrides`; ב-`update_products_batch_2.py` נוספו parser ויישום כפוי ל-payload לפני שליחה למודול MG: תמיכה ב-`param_X=@N` (בחירת אופציה N בקומבו), `icon_34=true/false`, וכן דגלים בסגנון `--icon-34` / `--no-icon-17`; במודול החיצוני `C:\Projects\AgentUpdateMGsystem\update_product.py` נוספה תמיכה במרקר `__OPTION_INDEX__:N` כדי לבחור ערך קומבו לפי אינדקס (1-based).
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, king_games_product_manager/update_products_batch_2.py, C:\Projects\AgentUpdateMGsystem\update_product.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: smoke חי על `35689` עם overrides `param_1=@4`, `--icon-34`, `--no-icon-17` הסתיים `EXIT_CODE=0`; בלוג מאשר `[MG Force Overrides] Applied`; payload אחרון מאשר: `param_1=__OPTION_INDEX__:4`, `icon_34=True`, `icon_17=False`.
+- Outcome: ניתן כעת לכפות ערכי MG נקודתיים (קומבו/checkbox) בכל ריצה דרך ה-UI, ללא תלות בתוצאת AI/prediction.
+
+### [ID: 20260716-16] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: לפני קריאת תמונות מהספרייה לפי מק"ט, לשנות שמות קבצים ל-`1,2,3...` עם אותה סיומת לפי סדר קובץ ישן->חדש (הכי ישן יקבל `1`).
+- Implementation: ב-`update_products_batch_2.py` נוספה פונקציה `_normalize_local_image_filenames(image_dir)` שמאתרת קבצי תמונה (`webp/png/jpg/jpeg`), ממיינת לפי `mtime` ואז שם, ומבצעת rename דו-שלבי בטוח (דרך שמות זמניים) למניעת התנגשויות. הפונקציה מוזנקת אוטומטית בתוך `_list_local_images_for_sku(...)` רגע לפני קריאת הקבצים מהספרייה, כך שהלוגיקה הקיימת של בחירת קבצים נשמרת ורק נוסף שלב נרמול שמות. הועלו גרסאות ל-API/APP `0.96`/`1.34`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics נקיים עבור כל הקבצים ששונו; חיבור הפונקציה מאומת בנתיב קריאת תמונות לפי SKU כך שהנרמול קורה תמיד לפני list/selection.
+- Outcome: MG יקבל נתיבי קבצים עם שמות ממוספרים ויציבים (`1.ext`, `2.ext`, `3.ext`...), לפי סדר גיל קובץ, בלי לשנות את שאר לוגיקת ההעלאה.
+
+### [ID: 20260716-15] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: לבדוק האם נשלח אותו ערך לשדות `catalog_num` ו-`sup_sku0` במודול עדכון MG, ולתקן כך ש-`catalog_num` יהיה שדה SAP ו-`sup_sku0` יישאר ספק.
+- Implementation: ב-`update_products_batch_2.py` תוקן מיפוי ה-payload ל-MG: `catalog_num` ממופה כעת ל-`sap_sku` במקום `supplier_sku`, ונוסף מיפוי מפורש ל-`sup_sku0` מתוך `supplier_sku`; בנוסף הועבר `sap_sku` לתוך `p_data` בשני מסלולי הפרסום (המסלול המקומי והמסלול הישן) כדי למנוע חוסר עקביות.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בוצעה הרצה חיה על `35689` ונקרא לוג payload אחרון: `catalog_num=208421`, `sup_sku0=100072`, `same=False`; כלומר ההפרדה בין SAP לספק תקינה.
+- Outcome: המערכת כבר לא שולחת אותו ערך לשני השדות; `catalog_num` מייצג SAP ו-`sup_sku0` מייצג מק"ט ספק.
+
+### [ID: 20260716-14] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: לתקן חוסר יציבות בפרסום MG עקב `No module named 'webdriver_manager'` ולתקן באג שבו מתבצע ניסיון הורדה/שמירה מיותר של עשרות תמונות גם כשיש תמונות לוקאליות או כשמנוע תמונות כבוי.
+- Implementation: תוקן שוב המודול החיצוני `C:\Projects\AgentUpdateMGsystem\update_product.py` לייבוא אופציונלי של `webdriver_manager` עם fallback ל-Selenium Manager; בוצעה התקנה יזומה של `webdriver-manager` בסביבת `KINGGAMES` ונוספה התלות ל-`requirements.txt`; ב-`update_products_batch_2.py` נוספה לוגיקה שמדלגת על `cache_saved_image_urls_as_webp(...)` כאשר יש כבר תמונות לוקאליות או כאשר `img_scrpt=off`, כך שלא מתבצעות הורדות 30 תמונות מיותרות; נוספה גם שכבת self-heal ב-`_load_external_mg_updater_module()` שמזהה `ModuleNotFoundError: webdriver_manager`, מתקינה `webdriver-manager` ומנסה שוב טעינת מודול חיצוני אוטומטית. הועלו גרסאות ל-API/APP `0.94`/`1.32`.
+- Files changed: C:\Projects\AgentUpdateMGsystem\update_product.py, king_games_product_manager/update_products_batch_2.py, requirements.txt, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: הרצה חיה על `35689` עם `--publish-to-mg --ai-agent off --img-scrpt off --check-local-images-first --headless` הסתיימה `EXIT_CODE=0`; בלוג ההרצה הופיע במפורש `Local images already exist ... Skipping remote image caching from AI/saved URLs`; ריצת הפרסום עברה את נקודת הכשל הישנה (`webdriver_manager`) והמשיכה לעדכוני שדות/תמונות בפועל.
+- Outcome: שגיאת `webdriver_manager` הפסיקה לחסום את פרסום MG, וניסיון שמירת תמונות מיותר מהסוכן לא רץ יותר כשיש לוקאלי או כשהמנוע כבוי.
+
+### [ID: 20260716-13] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: ריצת פרסום נעצרה באמצע עם `execution_error` עקב `No module named 'webdriver_manager'`.
+- Implementation: תוקן המודול החיצוני `C:\Projects\AgentUpdateMGsystem\update_product.py` כך שייבוא `webdriver_manager` יהיה אופציונלי (`try/except`), ובמקרה שהחבילה אינה מותקנת תתבצע נפילה ל-`webdriver.Chrome(options=...)` (Selenium Manager) במקום קריסה בזמן import. בוצע smoke להרצת publish path למוצר `35688` כדי לוודא שהזרימה עוברת את נקודת הכשל. הועלו גרסאות ל-API/APP `0.93`/`1.31`.
+- Files changed: C:\Projects\AgentUpdateMGsystem\update_product.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: ולידציית import החזירה `IMPORT_OK True`; ריצת `update_products_batch_2.py 35688 --publish-to-mg ...` התקדמה בפועל עד `Navigating to login page` ו-`Submitting login credentials` (כלומר ללא קריסת import); בדיקת `product_errors` עבור `35688` החזירה `ROWS=0`.
+- Outcome: כשל `No module named 'webdriver_manager'` לא עוצר יותר את ריצת הפרסום, גם כש`webdriver_manager` אינו מותקן בסביבה.
+
+### [ID: 20260716-12] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: להטמיע זרימת העשרה חובה ב-2 פאזות כדי למנוע שליחת סכמת מפרט שגויה (למשל laptop למסכים), ולהריץ יחידנית על `35688,35689,35690`.
+- Implementation: ב-`update_products_batch_2.py` הוטמע מנגנון 2 פאזות: Phase-1 מסווג קטגוריה בלבד עם סכמת מפרט ניטרלית (`PHASE1_NEUTRAL_SPECS_KEYS`) ו-guardrail לפי confidence; לאחר מכן Phase-2 רץ רק עם קטגוריה נעולה וסכמת מאפיינים של אותה קטגוריה (`leaf_categories_text` חד-ערכי לקטגוריה הנעולה). נוספו חסמי בטיחות: `CATEGORY_PHASE1_CONFIDENCE_THRESHOLD=85`, אימות סכמת `PRODUCT_TECHNICAL_DETAILS` מול `specs_keys` בפועל, ורישום מטא-שדות פאזות (`PHASE1_CATEGORY_*`, `PHASE2_CATEGORY_LOCKED_ID`) לתוך `engine_response`. בנוסף תוקנה `infer_product_type_for_engine` כך שלא תחזיר `laptop` כברירת מחדל גורפת. בוצע version bump ל-API/APP `0.92`/`1.30`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: ריצת יחידני על `35688,35689,35690` הושלמה (`EXIT_CODE=0`) ונבדקה ישירות מ-`products.db`: לכל שלושת המוצרים קיימים `PHASE1_CATEGORY_RECOMMENDED_ID`, `PHASE1_CATEGORY_CONFIDENCE_PERCENT`, `PHASE2_CATEGORY_LOCKED_ID`; סכמות `PRODUCT_TECHNICAL_DETAILS` מכילות 15 מפתחות של מסכים וללא מפתחות מחשב נייד (`laptop_key_hits=0`).
+- Outcome: תהליך ההעשרה עבר למודל דו-שלבי קשיח, כך שלא נשלחת יותר סכמת מפרט של קטגוריה אחרת לפני נעילת קטגוריה, ובדיקת 35688/35689/35690 עברה ללא זליגת שדות laptop.
+
+### [ID: 20260716-11] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: במסלול "חילוץ תמונות לפי ספקים" לשמור את התמונות בתיקייה לפי `supplier1_sku` ולא לפי `sap_sku`.
+- Implementation: ב-`supplier_image_extraction_runner.py` תוקן סדר העדיפויות של `folder_sku` כך ששם התיקייה נקבע קודם מ-`available_suppliers[0]["sku"]` ורק אם חסר נופל ל-`sap_sku`, ולא להפך. הועלו גרסאות ל-API/APP `0.91`/`1.29`.
+- Files changed: king_games_product_manager/supplier_image_extraction_runner.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: diagnostics נקיים ל-`supplier_image_extraction_runner.py`; חיפוש קוד מאשר שהשורה הקנונית היא כעת `folder_sku = available_suppliers[0]["sku"] or product["sap_sku"] or product["mg_id"]`.
+- Outcome: חילוץ התמונות לפי ספקים ישמור מעכשיו בתיקייה על שם מק"ט ספק ראשון כברירת מחדל, ולא על שם מק"ט SAP.
+
+### [ID: 20260716-10] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: להתאים את המערכת למודול MG המעודכן שמקבל תמונות דרך `image1..image5`, ולהריץ שוב את `35687`.
+- Implementation: ב-`update_products_batch_2.py` הוחלפה מסירת התמונות למודול החיצוני כך ש-`update_data` מקבל ישירות את `image1..image5` עם נתיבי קבצים מקומיים, במקום `image_path/image_paths` כארגומנטים חיצוניים; בנוסף תוקן תנאי `allow_image_upload` כך שגם תמונות שכבר קיימות בדיסק ייחשבו תקינות להעלאה ולא רק תמונות שהורדו באותה ריצה. במודול `C:\Projects\AgentUpdateMGsystem\update_product.py` הושב fallback של `webdriver_manager` ונוספה הקשחת מילוי שדות/תוכן כדי להגיע בפועל לשלב העלאת התמונות. הועלו גרסאות ל-API/APP `0.90`/`1.28`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, C:\Projects\AgentUpdateMGsystem\update_product.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: לפני הריצה אומת קיום 3 קבצים ב-`C:\Temp\100103`; בריצה האחרונה של `35687` הלוג הראה `Uploading image1`, `Uploading image2`, `Uploading image3` ואף `Uploading image4`, `Uploading image5`; קובץ payload אחרון `mg_payload_35687_20260716_183228_171590.json` מראה בפועל `image1..image5` בתוך `update_data`; ב-`process_run.log` מופיע `Product updated successfully! Final URL: https://www.king-games.co.il/apanel/products&edit=35687`.
+- Outcome: המערכת מעבירה כעת תמונות למודול MG בפורמט `image1..image5` בהתאם לחוזה החדש, והרצת `35687` המשיכה בפועל דרך שלב העלאת התמונות והסתיימה בהצלחה.
+
+### [ID: 20260716-09] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: להפסיק כל קוד שמוחק תמונות מוצר מהדיסק, לאחר שהתברר שקבצי תמונה קיימים של מוצר נמחקו במהלך זרימת ההזנה.
+- Implementation: ב-`update_products_batch_2.py` הוסרה הלוגיקה שניקתה את כל תוכן `save_dir` בתוך `download_webp_images(...)`; במקומה נוספה שמירה על קבצים קיימים, ספירת קבצי תמונה שכבר קיימים בתיקייה, וכתיבת קבצים חדשים רק לשמות הפנויים הבאים (`1.webp`, `2.webp`, ... בלי למחוק או לדרוס קבצים ישנים). הועלו גרסאות ל-API/APP `0.89`/`1.27`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: חיפוש קוד מאשר שנמחק בלוק `os.remove(...)` שניקה את `save_dir` לפני הורדת תמונות; diagnostics נקיים עבור `update_products_batch_2.py`.
+- Outcome: זרימת הורדת/שמירת תמונות לא תמחק יותר קבצי תמונה קיימים של מוצרים מהדיסק.
+
+### [ID: 20260716-08] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: לבדוק למה במוצר יחידני `35687` לא מתעדכנים מאפייני הקטגוריה, תמונות ו-`description`, ולהדפיס לוג מלא של מה שנשלח למודול עדכון מוצרי MG.
+- Implementation: ב-`update_products_batch_2.py` נוספה שמירת payload מלא למסירת MG לקבצי JSON תחת `mg_updater_payload_logs`, יחד עם הדפסה מפורשת לטרמינל; נוספה העברת מאפייני קטגוריה כ-`param_*` ל-payload של המודול החיצוני באמצעות מיפוי מ-`load_category_attributes_with_codes(...)`; נוספה תמיכה בחיפוש תמונות גם לפי `manufacturer_sku` וגם כ-fallback בקבצי root תחת `C:\TEMP`; במודול החיצוני `C:\Projects\AgentUpdateMGsystem\update_product.py` נוספה הדפסת payload שהתקבל, תמיכה ב-`param_*` דינמיים, וניסיון בחירה לפי visible text כאשר `select_by_value` לא מספיק. הועלו גרסאות ל-API/APP `0.88`/`1.26`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, C:\Projects\AgentUpdateMGsystem\update_product.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: נוצר לוג payload בפועל עבור `35687` בנתיב `king_games_product_manager\mg_updater_payload_logs\mg_payload_35687_20260716_174707_814562.json`; הלוג מראה העברה של `description`, `content`, `content2`, ופרמטרי קטגוריה כגון `param_34`, `param_112`, `param_117`, `param_118`, `param_119`, `param_120`, `param_214`; ב-DB שגיאת `webdriver_manager` כבר איננה השגיאה הפעילה, ובלוג הריצה הופיע `Product updated successfully! Final URL: https://www.king-games.co.il/apanel/products&edit=35687`.
+- Outcome: כעת יש שקיפות מלאה על ה-payload שנשלח ל-MG, מאפייני קטגוריה מועברים בפועל למודול החיצוני, ונוספו מסלולי fallback רלוונטיים לתמונות מקומיות.
+
+### [ID: 20260716-07] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: לתקן שגיאת הזנת מוצר יחידני `35687` שבה publish ל-MG נופל עם `No module named 'webdriver_manager'`, ולאמת את המסלול כשכל אפשרויות התיאורים/תמונות ו-MG מסומנות.
+- Implementation: במודול החיצוני `C:\Projects\AgentUpdateMGsystem\update_product.py` הוחלפה התלות הקשיחה ב-`webdriver_manager` בטעינה גמישה: אם הספרייה קיימת משתמשים בה, ואם לא עוברים ל-`webdriver.Chrome(...)` עם Selenium Manager; בנוסף הוקשחה כתיבת שדות טקסט/Select עם fallback ל-JavaScript כאשר Selenium נכשל, ותוקן עדכון `content/content2` ב-TinyMCE להעברת HTML דרך `arguments` במקום הזרקת מחרוזות JS שבירה. בוצע version bump ל-API/APP `0.87`/`1.25`.
+- Files changed: C:\Projects\AgentUpdateMGsystem\update_product.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: ייבוא המודול החיצוני אומת פעמיים (`IMPORT_OK True`); בוצעה הרצה חיה של `update_products_batch_2.py 35687 --ai-agent on --img-scrpt on --publish-to-mg --headless --set-sup-update 1 --set-unlimited 1 --preserve-existing-images --check-local-images-first`; ב-DB שגיאת `webdriver_manager` נשארה רק כרשומה ישנה (`id=113`), ולאחר התיקונים מצב המוצר הוא `mg_id=35687`, `sync_flag=1`, `is_preupload=0`, `last_sync_at=2026-07-16 17:24:45`.
+- Outcome: באג `webdriver_manager` במסלול publish של מוצר יחידני סודר, והרצת `35687` עברה את נקודת הכשל הישנה והשלימה publish מקומי/סטטוס סנכרון.
+
+### [ID: 20260716-06] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: לוודא שבקליטת מחירון אמטל המחירים נשארים כמו במחירון (ללא מע"מ וללא מכפיל) כאשר מסומן לא לבצע חישוב.
+- Implementation: ב-`server.py` הורחבה הפונקציה `_apply_supplier_price_defaults` כך שספק אמטל מקבל guardrail של `price_use_raw_no_margin=true` כאשר לא הוגדרה דריסת תמחור מפורשת בטאב; נשמרה ההתנהגות הקיימת של ישפאר עם `-10`, ולאמטל נקבע ללא דלתא ברירת מחדל. הועלו גרסאות ל-API/APP `0.86`/`1.24`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בוצעה בדיקה חיה על הקובץ `C:\סנכרון אתר\קבצים לטיפול\תקשורת  DLINK CUDY  מחירון אמטל   יולי.xls` מול `/api/supplier/analyze` אחרי hard-restart לגרסה `0.86`; תוצאות: `price_rows=118`, `mismatches=0`, `non_1x_multiplier=0`, וכל השורות עם `pricing_source=raw_no_margin_override` ו-`final_price == raw_price`.
+- Outcome: בקליטת מחירון אמטל המחיר הסופי יוצא כעת בדיוק כמו במחירון, ללא חישוב מע"מ וללא מכפיל.
+
+### [ID: 20260716-05] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: תיקון באג קליטת מחירון ספק אמטל שבו סומן "ללא חישוב" אך המערכת עדיין חישבה מחיר סופי שונה.
+- Implementation: ב-`server.py` תוקן מסלול `/api/supplier/analyze` כך ש-`category_margin_overrides` לא דורסים יותר שורות שטאב המיפוי שלהן מסומן עם `price_use_raw_no_margin=true`; עבור שורות כאלה נשמר `pricing_source=raw_no_margin_override` והמחיר נשאר בהתאם ל-raw/delta במקום חישוב מרווח קטגוריה.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקת קוד מאשרת ש-override קטגוריה מדולג כאשר טאב מסומן "ללא חישוב"; גרסאות עודכנו ל-API/APP `0.85`/`1.23`.
+- Outcome: סימון "ללא חישוב" גובר כעת על override קטגוריה, ולכן מחיר אמטל לא אמור להשתנות ע"י חישוב מרווח כאשר האופציה מסומנת.
+
+### [ID: 20260716-04] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: המשך ניקוי מלא של נתיבי כתיבה ישנים ל-MG כדי לאכוף שימוש בלעדי במודול העדכון החיצוני.
+- Implementation: ב-`update_products_batch_2.py` הוסרה fallback ישירה לכרטיס עריכת CMS (במקרה מוצר חסר ב-DB מתבצע skip ברור), והוחלפה זרימת השבתת מוצרי Amtel ללא תמונות לקריאה ל-`update_mg_product_via_external_module(...)` במקום ניווט/שמירה ישירים; בנוסף נוטרל סקריפט הכתיבה הלגאסי `update_products_batch.py` ע"י חסימת `update_product_on_cms` עם שגיאה מפורשת כדי למנוע שימוש עתידי במסלול כתיבה ישיר.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/update_products_batch.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: חיפוש קוד ממוקד מאשר שאין עוד `products&edit=` ב-`update_products_batch_2.py`; נתיבי הכתיבה הקריטיים שם עוברים דרך external updater; גרסאות עודכנו ל-API/APP `0.84`/`1.22`.
+- Outcome: מסלולי הכתיבה הישנים צומצמו משמעותית והאכיפה על external updater התחזקה גם ברמת קוד וגם ברמת חסימת סקריפט legacy.
+
+### [ID: 20260716-03] [Status: completed]
+- Timestamp: 2026-07-16
+- Request: הטמעת מודול עדכון MG חיצוני כך שכל עדכון מוצר יעבור רק דרכו, ללא שינוי במודול עצמו שנמצא בשלבי פיתוח.
+- Implementation: נוספה ב-`update_products_batch_2.py` שכבת adapter שטוענת דינמית את `C:\Projects\AgentUpdateMGsystem\update_product.py` וקוראת ל-`update_product_in_apanel`; הוחלף מסלול עדכון הערות skip ב-MG לשימוש במודול החיצוני במקום ניווט ישיר ל-`/apanel/products&edit=...`; הוחלף מסלול הפרסום הראשי `update_product_on_cms` כך שכתיבת מוצר ל-MG מתבצעת דרך המודול החיצוני בלבד; נתיב `desktop-replacement apply` הושבת בשרת עם 501 כדי למנוע כתיבות דרך זרימת ה-CMS הישנה; הועלו גרסאות API/APP ל-`0.83`/`1.21`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בוצעו diagnostics לקבצים ששונו; לא בוצע שום שינוי בקובץ המודול החיצוני `C:\Projects\AgentUpdateMGsystem\update_product.py`.
+- Outcome: כתיבות MG בזרימת ingestion מנותבות דרך המודול החיצוני; נתיב apply הישן של Desktop Replacement נחסם כדי לא לאפשר כתיבה מחוץ למודול.
+
 ### [ID: 20260716-02] [Status: completed]
 - Timestamp: 2026-07-16
 - Request: הקריאה מקובץ הלידים לא טובה; הוכן קובץ CSV מסודר חדש בנתיב קבוע `C:\Projects\KINGGAMES\king_games_product_manager\downloads\all_users last5000 לידים Taskey.csv` ויש לעדכן את המערכת לעבוד מולו עם יותר התאמות להצעות SAP.

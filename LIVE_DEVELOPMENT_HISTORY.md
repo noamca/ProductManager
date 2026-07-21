@@ -35,6 +35,15 @@ Policy: from now on, every requested change gets an entry.
 ---
 
 ## Entries\n
+### [ID: 20260721-02] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: Reverted AI model back to gemini-3.5-flash as the API confirms it is available.
+- Implementation: Replaced gemini-1.5-pro with gemini-3.5-flash in update_products_batch_2.py and enricher.py. Bumped version to 2.00.
+- Files changed: update_products_batch_2.py, enricher.py, app.js
+- Verification: Scripts ran successfully. API returned gemini-3.5-flash in models list.
+- Outcome: completed.
+- Follow-ups: none.
+\n
 ### [ID: 20260721-01] [Status: completed]
 - Timestamp: 2026-07-21
 - Request: Changed AI model from gemini-3.5-flash to gemini-1.5-pro to fix 404 error (gemini-3.5-flash does not exist).

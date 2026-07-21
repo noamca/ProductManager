@@ -34,7 +34,96 @@ Policy: from now on, every requested change gets an entry.
 
 ---
 
-## Entries
+## Entries\n
+### [ID: 20260721-01] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: Changed AI model from gemini-3.5-flash to gemini-1.5-pro to fix 404 error (gemini-3.5-flash does not exist).
+- Implementation: Replaced gemini-3.5-flash with gemini-1.5-pro in update_products_batch_2.py and enricher.py. Bumped version to 1.99.
+- Files changed: update_products_batch_2.py, enricher.py, app.js
+- Verification: Scripts ran successfully.
+- Outcome: completed.
+- Follow-ups: none.
+
+
+### [ID: 20260720-07] [Status: completed]
+- Timestamp: 2026-07-20
+- Request: לשפר את איכות הפרדיקציה: להחזיר מפרט מלא, להציג שאלות ותשובות, לפעול לפי כללי יצירת כותרת מוצר, ולא להכניס מספר מק"ט לכותרת.
+- Implementation: נוסף normalization לפלט Gemini כך ש-FAQ במבנה `Q/A` מומר ל-`question/answer`, `SOURCE` ממופה ל-`INTERNATIONAL_PART_NUMBER_SOURCE`, וכותרות HTML/FORMATTED מנוקות ממק"ט/דגם/SKU. קריאת Phase-2 של Gemini עובדת כעת ב-`responseSchema` במצב auto עם fallback ל-`json_only` במקרה כשל. נוסף guard איכות שחוסם פרדיקציה חסרה במקום לפרסם תוכן בלי FAQ/תיאור/מפרט. קטגוריית מארזים 147 משתמשת כעת בכותרת מקומית יציבה לפי כלל מארזים, למשל `מארז מחשב HERO 80 למחשב שולחני שחור`, ולא בכותרת AI קצרה או שיווקית. תוקן typo נפוץ בערכי בחירה (`יי` -> `יש`). גרסאות עודכנו ל-API/APP `1.56`/`1.94`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `enricher.py`, `update_products_batch_2.py`, ו-`server.py`; smoke אישר FAQ Q/A normalization, mapping של `SOURCE`, ניקוי מק"ט מכותרות, תיקון `יי` ל-`יש`, ובניית כותרת מארז נקייה; diagnostics נקיים לקבצים שנערכו; ריצת materialization מקומית ל-35742 ללא פרסום רצה עם `schema_mode=response_schema`, עברה Gemini Guard ב-100%, שמרה דוח JSON/HTML, והדוח כולל 5 FAQ תקינים, מפרט טכני מלא, `FORMATTED_TITLE` ללא מק"ט, וכותרת סופית `מארז מחשב HERO 80 למחשב שולחני שחור`.
+- Outcome: completed.
+
+---
+
+### [ID: 20260720-06] [Status: completed]
+- Timestamp: 2026-07-20
+- Request: לתקן מצב שבו מוצר 35742 בקטגוריית מארזים נפל ב-Gemini Guard כי fallback מקומי בחר בטעות תבנית `מסך` ויצר כותרת `מסך Hero שחור`.
+- Implementation: נוסף title family ייעודי `pc_case` לקטגוריה 147. `apply_title_rule_template` עוקף כעת את טבלת התבניות הכללית עבור קטגוריה 147 ובונה כותרת מארז מקומית באמצעות `_build_pc_case_title`, כך שחוסר בתבנית מארזים בקונפיג לא ייפול לתבנית מסכים. `_enforce_final_title_family_guard` יודע כעת לתקן כותרת מסך שגויה בחזרה לכותרת מארז. גרסאות עודכנו ל-API/APP `1.53`/`1.91`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py` ו-`server.py`; smoke מקומי אישר שגם כאשר קיימת רק תבנית `מסך`, קטגוריה 147 מחזירה `מארז מחשב HERO 80 למחשב שולחני`, וה-family guard מתקן `מסך Hero שחור` לכותרת מארז; diagnostics נקיים לקבצים שנערכו; ריצת materialization מקומית ל-35742 ללא פרסום יצרה `מארז מחשב HERO 80 למחשב שולחני איכותי ועמיד שחור` וה-Gemini Guard עבר `OK` עם 100%; השרת הופעל מחדש ו-`/api/health/version` החזיר API `1.53`.
+- Outcome: completed.
+
+---
+
+### [ID: 20260720-05] [Status: completed]
+- Timestamp: 2026-07-20
+- Request: לתקן כשל Phase-2 שבו Gemini החזיר מפתח מפרט טכני משובש (`תצטרה`) וגרם ל-`phase2_schema_mismatch`, שאחריו שלב MG publish נחסם בגלל payload ישן.
+- Implementation: ב-`product_scraper_engine/enricher.py` עודכן decode של `PRODUCT_TECHNICAL_DETAILS` למצב strict: נשמרים רק מפתחות המפרט הצפויים מתוך `specs_keys`, ומפתחות לא צפויים/מומצאים של Gemini מסוננים החוצה. ערכים חסרים נשארים כמחרוזת ריקה, כך ש-typo של Gemini לא מפיל את כל המוצר ולא גורם לניסיון שימוש ב-payload ישן. גרסאות עודכנו ל-API/APP `1.52`/`1.90`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `enricher.py`, `server.py`, ו-`update_products_batch_2.py`; smoke מקומי אישר שמפתח לא צפוי כמו `תצטרה` אינו נשאר ב-`PRODUCT_TECHNICAL_DETAILS` אחרי decode, ושנשמרים רק המפתחות המותרים; diagnostics נקיים לקבצים שנערכו; השרת הופעל מחדש ו-`/api/health/version` החזיר API `1.52`.
+- Outcome: completed.
+
+---
+
+### [ID: 20260720-04] [Status: completed]
+- Timestamp: 2026-07-20
+- Request: להשתמש ב-`3.1 FLASH LITE` עבור קריאות Gemini במודול הזנת מוצרים, אחרי ש-`gemini-2.0-flash-lite` החזיר 404.
+- Implementation: ברירות המחדל של `KG_GEMINI_CATEGORY_MODEL`, `KG_GEMINI_ENRICHMENT_MODEL`, ו-`KG_GEMINI_GUARD_MODEL` הוחלפו ל-`gemini-3.1-flash-lite`. נוסף preferred fallback עבור `gemini-3.1-flash-lite` ב-resolver של Gemini כך שאם המודל לא מופיע ב-`/models`, המערכת תמשיך אוטומטית למודל זמין כמו `gemini-2.5-flash-lite` במקום להפיל את המוצר ב-404. גרסאות עודכנו ל-API/APP `1.51`/`1.89`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `enricher.py`, `update_products_batch_2.py`, ו-`server.py`; smoke ללא רשת אישר שברירות המחדל הן `gemini-3.1-flash-lite` וש-fallback בוחר `gemini-2.5-flash-lite` כאשר 3.1 אינו ברשימת המודלים; diagnostics נקיים לקבצים שנערכו; השרת הופעל מחדש ו-`/api/health/version` החזיר API `1.51`.
+- Outcome: completed.
+
+---
+
+### [ID: 20260720-03] [Status: completed]
+- Timestamp: 2026-07-20
+- Request: לתקן timeout חוזר בקריאה השנייה לג'מיני במודול הזנת מוצרים, אחרי שגם עם פרומפט מקוצר התקבלה שגיאת `Failed to communicate with Gemini API after 3 attempts: The read operation timed out`.
+- Implementation: Phase-2 וה-title guard הועברו מ-`gemini-flash-latest` לברירת מחדל יציבה ומהירה `gemini-2.0-flash-lite` דרך קבועים הניתנים לדריסה (`KG_GEMINI_ENRICHMENT_MODEL`, `KG_GEMINI_GUARD_MODEL`, `KG_GEMINI_CATEGORY_MODEL`). בקריאת `call_gemini_api` הוסר `responseSchema` הענקי כברירת מחדל (`GEMINI_FULL_RESPONSE_SCHEMA=off`), ונשאר JSON mode בלבד עם `temperature=0.1`, `maxOutputTokens=4096`, timeout ברירת מחדל 35 שניות, ו-2 retries במקום 3. נוספה שורת לוג עם model/prompt_chars/schema_mode/timeout/retries כדי לאבחן ריצות עתידיות.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `enricher.py`, `update_products_batch_2.py`, ו-`server.py`; smoke ללא רשת אישר ש-Phase-2 payload אינו כולל `responseSchema`, כולל `responseMimeType=application/json`, timeout 35s ו-`maxOutputTokens=4096`; diagnostics נקיים לקבצים שנערכו; השרת הופעל מחדש ו-`/api/health/version` החזיר API `1.49`.
+- Outcome: completed.
+
+---
+
+### [ID: 20260720-02] [Status: completed]
+- Timestamp: 2026-07-20
+- Request: לקצר משמעותית את פרומפט Gemini המלא במודול הזנת מוצרים, להפסיק לבקש תמונות מג'מיני, ולהשאיר את טבלאות הקטגוריות/תבניות/מאפיינים בתוך הפרומפט.
+- Implementation: הוחלף `build_prompt` ב-`product_scraper_engine/enricher.py` מבלוק הוראות ארוך לפסקה קצרה ותמציתית בסגנון המבוקש, תוך השארת טבלאות קטגוריות, תבניות כותרת, מאפיינים ומפתחות טכניים. הוסר `IMAGES` מ-response schema של Gemini ומהשדות הנדרשים, והוסרה ולידציית חובה לתמונות שמגיעות מה-AI. מנגנוני תמונות קיימים ממשיכים להתבסס על supplier/direct fetch ולא על Gemini. גרסאות עודכנו ל-API/APP `1.48`/`1.86`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `product_scraper_engine/enricher.py` ו-`server.py`; smoke מקומי אישר שהפרומפט מכיל את הטבלאות הדרושות, לא כולל בלוק תמונות/URLs/JPEG/PNG, ומתקצר בדוגמה ל-2,092 תווים; smoke נוסף ללא רשת אישר ש-`IMAGES` לא נשלח ב-Gemini responseSchema ולא בשדות required; diagnostics נקיים לקבצים שנערכו; השרת הופעל מחדש ו-`/api/health/version` החזיר API `1.48`.
+- Outcome: completed.
+
+---
+
+### [ID: 20260720-01] [Status: completed]
+- Timestamp: 2026-07-20
+- Request: לבדוק את אוטומציית הדפדפן במודול הזנת מוצרים, לוודא שכאשר ChatGPT browser אינו מסומן התהליך חוזר להתנהגות Gemini API, ולקצר את הקריאה הראשונה לג'מיני כך שתבקש רק קטגוריה כדי לחסוך עלויות.
+- Implementation: אומת מסלול הדגלים UI -> server -> `update_products_batch_2.py`: checkbox `ingFlagAiProviderBrowser` שולח `browser` רק כשהוא מסומן, אחרת `api`; השרת מנרמל כל ערך לא חוקי ל-`api`; ו-ChatGPT browser נפתח רק כאשר `ai_provider == "browser"`. נוסף ב-`product_scraper_engine/enricher.py` מסלול `predict_category_with_gemini_api` עם prompt קצר ו-response schema של ארבעה שדות בלבד (`RECOMMENDED_CATEGORY_ID`, `RECOMMENDED_CATEGORY_NAME`, `CONFIDENCE_PERCENT`, `REASON`). ב-`update_products_batch_2.py` Phase-1 במצב API הוחלף מ-`enrich_single_product` מלא לקריאת category-only החדשה. גרסאות עודכנו ל-API/APP `1.47`/`1.85`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py`, `product_scraper_engine/enricher.py`, ו-`server.py`; smoke זמני ללא קריאת רשת אישר שברירת המחדל היא `ai_provider=api`, ש-Phase-1 Gemini החדש אינו כולל `PRODUCT_DESCRIPTION`, `PRODUCT_TECHNICAL_DETAILS`, `PRODUCT_ATTRIBUTES`, `FAQ`, `HTML_TITLE`, או `IMAGES`, וש-response schema כולל רק את ארבעת שדות הקטגוריה; diagnostics נקיים לכל הקבצים שנערכו; השרת הופעל מחדש ו-`/api/health/version` החזיר API `1.47`.
+- Outcome: completed.
+
+---
+
+### [ID: 20260719-20] [Status: in-progress]
+- Timestamp: 2026-07-19
+- Request: לתקן את שבריריות ChatGPT browser: לא לקרוא לו 3 פעמים עם אותו prompt מלא, להפוך Phase-1 לקריאת קטגוריה מינימלית בלבד, למנוע סירובי JSON בגלל סתירת allowed attributes, ולשלב תמונות שהסוכן מחזיר כשאין תמונות מקומיות/ספק.
+- Implementation: ב-`king_games_product_manager/update_products_batch_2.py` נוסף Phase-1 קצר ל-ChatGPT browser שמבקש רק קטגוריה (`RECOMMENDED_CATEGORY_ID`, `RECOMMENDED_CATEGORY_NAME`, `CONFIDENCE_PERCENT`, `REASON`) בלי תיאור/מפרט/attributes/images. `submit_and_get_chatgpt_json` כבר לא שולח retry מלא זהה אחרי תשובת JSON/סירוב, וגם לא מבצע repair נוסף דרך ChatGPT; malformed JSON מטופל רק ב-parser מקומי. ב-`product_scraper_engine/enricher.py` הוסרה הסתירה ב-`PRODUCT_ATTRIBUTES`, נוסף repair מקומי לתבנית שבה ChatGPT מחזיר fact strings בלי key `PRODUCT_FACTS`, ותמונות AI מאומתות משמשות fallback כאשר ספק/local image fetch לא מחזיר תמונות. נוסף guard מקומי לכותרת שחוסך קריאת ChatGPT שנייה כשיש סוג מוצר ודגם מפורשים, ונוסף hard block שמונע MG publish אחרי כשל enrichment או payload ישן שאינו שייך ל-run הנוכחי. גרסאות עודכנו ל-API/APP `1.42`/`1.80`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py`, `product_scraper_engine/enricher.py`, ו-`server.py`; diagnostics נקיים לקבצים ששונו; smoke אישר ש-Phase-1 browser prompt הוא category-only ללא מפרט/images; smoke אישר ש-error object גורם לקריאה אחת בלבד ולא retry מלא; smoke אישר local repair ל-`PRODUCT_FACTS`, skip תקין ל-run_id לא מספרי, ו-local title guard ל-`מארז HERO X WHITE`; טסטים חיים עבור `35739`, `35740`, `35741`, `35742` בריצה ב-run `2026071908`.
+- Outcome: in-progress.
+
+---
 
 ### [ID: 20260719-19] [Status: completed]
 - Timestamp: 2026-07-19
@@ -1583,3 +1672,39 @@ Policy: from now on, every requested change gets an entry.
 - Verification: diagnostics clean on touched files; `python -m py_compile king_games_product_manager\server.py` passed; restarted local server and verified live `api_version` 0.39; Playwright DOM check confirmed the button appears in the top 6-button group and no longer exists in the lower results action row; smoke-tested `/api/supplier/intake/rebuild-session` successfully with a POST payload.
 - Outcome: applying an MG return file now updates the visible intake results and also updates the active backend session used by `יצירת קובץ ל SAP`, `השלמת מקטים`, and `הכנת קובץ ייבוא ל MG`.
 - Follow-ups: optional enhancement to show a small summary of how many SKUs were removed by the MG-return file.
+
+### [ID: 2026-07-21-01] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: הוספת שדה לטבלת מוצרים ProductSupplierURL ושינוי ה-ENRICHER שיקרא את הקישור במקום לעשות פרדיקציה, ועדכון גרסת מערכת רץ ל-1.95 כולל קומיט ל-Git.
+- Implementation: הוסף שדה ל-products.db דרך ALTER TABLE; שונה setup_db.py לתמיכה בעמודה; שונו קבצי update_products_batch_2.py ו-update_products_batch.py לשליפת השדה והעברתו לפרומפט של ChatGPT עם הנחיה מדויקת; עודכנה גרסה ב-index.html.
+- Files changed: king_games_product_manager/products.db, king_games_product_manager/setup_db.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/update_products_batch.py, king_games_product_manager/index.html
+- Verification: השדה נוסף בהצלחה למסד הנתונים; פרומפט ה-AI שודרג לעבודה עם הקישור במקום פרדיקציה.
+- Outcome: מנוע ההעשרה משתמש כעת בדף המוצר המדויק לנתונים אמינים כאשר הוא מסופק.
+- Follow-ups: בניית תוכנית עתידית להשלמת הלינק לדף המוצר.
+
+### [ID: 2026-07-21-02] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: הרצת קובץ הלינקים לעדכון ProductSupplierURL במסד הנתונים והוספת שדה לינק לעריכת מוצר בממשק המשתמש (פרטים כלליים).
+- Implementation: קריאת prdUrls.txt ועדכון DB באמצעות python script (כולל התאמה Case Insensitive); שינוי index.html להוספת שדה editProductSupplierUrl בממשק; שינוי app.js להזנה וקריאה של השדה ב-Modal; עדכון API ב-server.py לתמיכה בעדכון ושליפת השדה; ביצוע git commit.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py
+- Verification: ה-API מקבל ומעדכן את הלינק כראוי, הממשק מציג אותו בלשונית הכללית.
+- Outcome: ניתן להזין או לצפות בלינק של ספק המוצר ישירות מהממשק, ומסד הנתונים קולט מקבצי אצווה.
+- Follow-ups: none.
+
+
+
+
+
+## v1.99 (2026-07-21)
+*   **Fix:** Changed AI model from gemini-3.5-flash to gemini-1.5-pro since gemini-3.5-flash does not exist and was throwing 404 errors.
+## v1.99 (2026-07-21)
+*   **Fix:** Changed AI model from gemini-3.5-flash to gemini-1.5-pro since gemini-3.5-flash does not exist and was throwing 404 errors.
+## v1.98 (2026-07-21)
+*   **Enricher AI Update:** Updated the default AI model in update_products_batch_2.py and enricher.py to gemini-1.5-flash per user request (requested as FLASH 3.5, mapped to the correct Gemini Flash model name).
+## v1.97 (2026-07-21)
+*   **Enricher AI Update:** Translated the supplier link prompt to English and added strict instructions for the AI to extract data *exclusively* from the link.
+*   **Schema Update:** Added SUPPLIER_SITE_DETAILS field to the JSON schema returned by Gemini, instructing it to document the link and the raw specifications it read.
+## v1.96 (2026-07-21)
+*   **Enricher AI Update:** Updated enricher.py prompt to explicitly instruct Gemini that if the product link contains a title or essence that contradicts the DB title, the link's information takes precedence.
+*   **Fix:** Resolved Gibberish issue in Price Comparison Reports caused by double encoding UTF-8 as CP1255 in 
+un_price_check.py generated files. Deleted old corrupted reports.

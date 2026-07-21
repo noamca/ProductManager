@@ -35,6 +35,15 @@ Policy: from now on, every requested change gets an entry.
 ---
 
 ## Entries\n
+### [ID: 20260721-03] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: Prediction still failing for product 35947 due to Gemini Guard blocking it for low title similarity, even when 'same_essence' is true.
+- Implementation: Removed the similarity percentage threshold completely from update_products_batch_2.py if same_essence is true. Now, if the AI determines it's fundamentally the same product line, it will allow the result to pass even if the similarity score is low (e.g., due to different generations, specs, etc. fetched from the supplier link).
+- Files changed: update_products_batch_2.py
+- Verification: Ran prediction for product 35947. Verified the result was no longer blocked by Gemini Guard, and the JSON output properly contained the new specs from the supplier link.
+- Outcome: completed.
+- Follow-ups: none.
+\n
 ### [ID: 20260721-02] [Status: completed]
 - Timestamp: 2026-07-21
 - Request: Reverted AI model back to gemini-3.5-flash as the API confirms it is available.

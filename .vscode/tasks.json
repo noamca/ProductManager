@@ -2419,6 +2419,22 @@
 			"type": "shell",
 			"command": "git add -u; if (Test-Path HOVERET_MAARECHET_KINGGAMES_v0.86.md) { git add HOVERET_MAARECHET_KINGGAMES_v0.86.md }; if (Test-Path PREDICTION.MD) { git add PREDICTION.MD }; if (Test-Path port8000.json) { git add port8000.json }; if (Test-Path server_processes.json) { git add server_processes.json }; git commit -m 'sync full workspace updates (ui/processes, history, configs, submodule pointer)'; git push origin HEAD",
 			"group": "build"
+		},
+		{
+			"label": "git-status-root-postpush",
+			"type": "shell",
+			"command": "git status --short"
+		},
+		{
+			"label": "git-log-last-root",
+			"type": "shell",
+			"command": "git log -1 --oneline"
+		},
+		{
+			"label": "git-commit-push-tasks-cleanup",
+			"type": "shell",
+			"command": "git add .vscode/tasks.json; git commit -m 'update vscode task history entries'; git push origin HEAD",
+			"group": "build"
 		}
 	]
 }

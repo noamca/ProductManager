@@ -2146,6 +2146,279 @@
 				"Set-Location 'c:\\Projects\\KINGGAMES\\king_games_product_manager'; git status --short update_products_batch_2.py app.js index.html server.py; Write-Output '---'; Set-Location 'c:\\Projects\\KINGGAMES'; git status --short LIVE_DEVELOPMENT_HISTORY.md LIVE_DEVELOPMENT_HISTORY.jsonl king_games_product_manager"
 			],
 			"isBackground": false
+		},
+		{
+			"label": "verify-35723-v111-proof",
+			"type": "shell",
+			"command": "c:/Projects/KINGGAMES/.venv/Scripts/python.exe",
+			"args": [
+				"-B",
+				"c:/Projects/KINGGAMES/king_games_product_manager/update_products_batch_2.py",
+				"35723",
+				"--ai-agent",
+				"on",
+				"--img-scrpt",
+				"off",
+				"--headless",
+				"--publish-to-mg"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "verify-35723-v111-proof-lines",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$log='C:\\Projects\\KINGGAMES\\scratch\\proof_35723_v111.log'; if(Test-Path $log){Remove-Item $log -Force}; c:/Projects/KINGGAMES/.venv/Scripts/python.exe -B c:/Projects/KINGGAMES/king_games_product_manager/update_products_batch_2.py 35723 --ai-agent on --img-scrpt off --headless --publish-to-mg 2>&1 | Tee-Object -FilePath $log; Select-String -Path $log -Pattern '\\[Local Enrichment\\] Processing product 35723|\\[Phase-1\\]\\[Category\\]|\\[Title Rules\\]\\[Reject Rendered\\]|\\[Title Rules\\]\\[AI\\]|\\[Gemini Guard\\]\\[Block\\]|\\[MG Publish\\]\\[Skip\\]|\\[MG Publish\\] Publishing product 35723' | ForEach-Object { $_.Line }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "run-35723-log-only",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$log='C:\\Projects\\KINGGAMES\\scratch\\proof_35723_v111.log'; if(Test-Path $log){Remove-Item $log -Force}; c:/Projects/KINGGAMES/.venv/Scripts/python.exe -B c:/Projects/KINGGAMES/king_games_product_manager/update_products_batch_2.py 35723 --ai-agent on --img-scrpt off --headless --publish-to-mg *> $log; Write-Output \"LOG=$log\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "run-35723-log-cmd",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35723 --ai-agent on --img-scrpt off --headless --publish-to-mg > c:\\Projects\\KINGGAMES\\scratch\\proof_35723_v111.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "download-cloudflared-portable",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$dest='C:\\Projects\\KINGGAMES\\scratch\\cloudflared.exe'; Invoke-WebRequest -Uri 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe' -OutFile $dest; Write-Output ('DOWNLOADED=' + $dest); Get-Item $dest | Select-Object FullName,Length"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "download-cloudflared-portable-cmd",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"curl.exe -L \"https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe\" -o \"C:\\Projects\\KINGGAMES\\scratch\\cloudflared.exe\" && dir \"C:\\Projects\\KINGGAMES\\scratch\\cloudflared.exe\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "health-check-8000",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"curl -s http://127.0.0.1:8000/api/health/version"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "start-cloudflared-tunnel-bg",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"\"C:\\Projects\\KINGGAMES\\scratch\\cloudflared.exe\" tunnel --url http://127.0.0.1:8000 --no-autoupdate --logfile \"C:\\Projects\\KINGGAMES\\scratch\\cloudflared_tunnel.log\" --loglevel info"
+			],
+			"isBackground": true
+		},
+		{
+			"label": "verify-35729-psu-family-fix",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35729 --ai-agent on --img-scrpt off --headless > c:\\Projects\\KINGGAMES\\scratch\\verify_35729_psu_fix.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "verify-35730-family-fix",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35730 --ai-agent on --img-scrpt off --headless > c:\\Projects\\KINGGAMES\\scratch\\verify_35730_family_fix.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "verify-35730-family-fix-rerun",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35730 --ai-agent on --img-scrpt off --headless > c:\\Projects\\KINGGAMES\\scratch\\verify_35730_family_fix.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "query-case-categories",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -c \"import sqlite3; conn=sqlite3.connect(r'c:\\Projects\\KINGGAMES\\king_games_product_manager\\products.db'); cur=conn.cursor(); rows=cur.execute(\\\"SELECT category_code, category_name FROM categories WHERE category_name LIKE '%מארז%' OR category_name LIKE '%CASE%' OR category_name LIKE '%מחשב נייח%' ORDER BY category_code\\\").fetchall(); print(rows); conn.close()\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "verify-35730-family-fix-v2",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35730 --ai-agent on --img-scrpt off --headless > c:\\Projects\\KINGGAMES\\scratch\\verify_35730_family_fix_v2.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "extract-35730-v2-proof-lines",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"findstr /n /c:\"[Local Enrichment] Processing product 35730\" /c:\"[Category Guard]\" /c:\"[Phase-1][Category]\" /c:\"[Title Guard]\" /c:\"title_guard_corrected\" /c:\"[Gemini Guard]\" c:\\Projects\\KINGGAMES\\scratch\\verify_35730_family_fix_v2.log"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "verify-35730-family-fix-v3",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35730 --ai-agent on --img-scrpt off --headless > c:\\Projects\\KINGGAMES\\scratch\\verify_35730_family_fix_v3.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "verify-35730-category-147-fix",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35730 --ai-agent on --img-scrpt off --headless > c:\\Projects\\KINGGAMES\\scratch\\verify_35730_category147_fix.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "verify-35730-category-147-fix-rerun2",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35730 --ai-agent on --img-scrpt off --headless > c:\\Projects\\KINGGAMES\\scratch\\verify_35730_category147_fix_rerun2.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "publish-correct-35730-category147",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35730 --ai-agent on --img-scrpt off --publish-to-mg --headless > c:\\Projects\\KINGGAMES\\scratch\\publish_35730_category147_fix.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "verify-35733-spec-li-format",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35733 --ai-agent on --img-scrpt off --headless > c:\\Projects\\KINGGAMES\\scratch\\verify_35733_spec_li_format.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "publish-35733-spec-li-format",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"c:\\Projects\\KINGGAMES\\.venv\\Scripts\\python.exe -B c:\\Projects\\KINGGAMES\\king_games_product_manager\\update_products_batch_2.py 35733 --ai-agent on --img-scrpt off --publish-to-mg --headless > c:\\Projects\\KINGGAMES\\scratch\\publish_35733_spec_li_format.log 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-status-root",
+			"type": "shell",
+			"command": "git status --short"
+		},
+		{
+			"label": "git-status-full-root",
+			"type": "shell",
+			"command": "git status"
+		},
+		{
+			"label": "git-remote-root",
+			"type": "shell",
+			"command": "git remote -v"
+		},
+		{
+			"label": "git-status-submodule",
+			"type": "shell",
+			"command": "git -C king_games_product_manager status --short"
+		},
+		{
+			"label": "git-status-full-submodule",
+			"type": "shell",
+			"command": "git -C king_games_product_manager status"
+		},
+		{
+			"label": "git-remote-submodule",
+			"type": "shell",
+			"command": "git -C king_games_product_manager remote -v"
+		},
+		{
+			"label": "git-status-submodule-tracked",
+			"type": "shell",
+			"command": "git -C king_games_product_manager status --short --untracked-files=no"
+		},
+		{
+			"label": "git-status-root-tracked",
+			"type": "shell",
+			"command": "git status --short --untracked-files=no"
+		},
+		{
+			"label": "git-commit-push-submodule-tracked",
+			"type": "shell",
+			"command": "git -C king_games_product_manager branch --show-current && git -C king_games_product_manager add -u && git -C king_games_product_manager commit -m \"stabilize UI/processes and sync workspace tracked updates\" && git -C king_games_product_manager push origin HEAD",
+			"group": "build"
+		},
+		{
+			"label": "git-commit-push-submodule-tracked-2",
+			"type": "shell",
+			"command": "git -C king_games_product_manager branch --show-current; git -C king_games_product_manager add -u; git -C king_games_product_manager commit -m \"stabilize UI/processes and sync workspace tracked updates\"; git -C king_games_product_manager push origin HEAD",
+			"group": "build"
+		},
+		{
+			"label": "git-status-submodule-after-push",
+			"type": "shell",
+			"command": "git -C king_games_product_manager status --short"
+		},
+		{
+			"label": "git-commit-push-root",
+			"type": "shell",
+			"command": "git add -u; if (Test-Path HOVERET_MAARECHET_KINGGAMES_v0.86.md) { git add HOVERET_MAARECHET_KINGGAMES_v0.86.md }; if (Test-Path PREDICTION.MD) { git add PREDICTION.MD }; if (Test-Path port8000.json) { git add port8000.json }; if (Test-Path server_processes.json) { git add server_processes.json }; git commit -m 'sync full workspace updates (ui/processes, history, configs, submodule pointer)'; git push origin HEAD",
+			"group": "build"
 		}
 	]
 }

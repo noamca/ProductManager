@@ -37,6 +37,8 @@ Thumbs.db
 # Secrets
 google_service_account.json
 **/google_service_account.json
+**/.env
+!**/.env.example
 
 # Local bare mirror used for nested project sync
 king_games_product_manager_remote.git/

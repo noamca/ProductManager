@@ -1,3 +1,147 @@
+# 2026-08-02 - Frontend parse error fixed; Processes menu restored (v2.42)
+
+- Request: the app was not showing the Processes screen and sidebar navigation was unresponsive because the frontend script stopped parsing.
+- Fixed `king_games_product_manager/app.js` by repairing the corrupted automated-process table render loop near the Processes view code.
+- Updated the browser cache-bust to load `app.js?v=2.42` and bumped the frontend version badge to `v2.42`.
+- Validation: browser-side parsing of the served `app.js?v=2.42` now succeeds, and clicking `עיבודים` switches the main area to the Processes screen with the live process table and log panel visible.
+- Outcome: sidebar navigation works again and the Processes screen renders normally.
+
+# 2026-08-02 - Telegram worker SAP timeout floor fixed and task 16 completed (v2.41 / API 1.70)
+
+- Request: task 16 was still pending because the worker kept dying on a 5 second SAP timeout and the Processes screen needed clear live logs.
+- Fixed `king_games_product_manager/telegram_bot_tasks_worker.py` so `SAP_SCRIPT_TIMEOUT_SEC` has a hard minimum of 120 seconds even if the environment tries to force a lower value, and added a startup log that prints the effective worker config.
+- Kept the live Processes log tail and streaming behavior in place; no UI regression was needed for this follow-up.
+- Bumped versions: frontend `2.41`, server API `1.70`.
+- Validation: restarted the backend, verified `/api/health/version` returned `1.70`, reran the worker, confirmed the log tail showed SAP success, MG save verification, `POST /tasks/16/complete` returned HTTP 200, and `/tasks/pending` became `[]`.
+- Outcome: task 16 is no longer pending, and the worker can no longer inherit a too-short SAP timeout that aborts the flow before completion.
+
+# 2026-08-02 - Telegram worker manual-run logging made immediate (v2.40 / API 1.69)
+
+- Request: when running the worker manually, logs should appear immediately in the console without requiring `python -u`.
+- Fixed `telegram_bot_tasks_worker.py` console behavior:
+	- enabled line-buffered stdout/stderr via `sys.stdout.reconfigure(..., line_buffering=True, write_through=True)` when supported
+	- changed `_log()` to `print(..., flush=True)` so each line is emitted immediately
+- Versions: frontend `2.40`, server API `1.69`.
+- Validation: manual unbuffered run already proved the worker prints live logs; compile check for updated worker passed.
+
+# 2026-08-02 - Telegram task completion policy tightened (v2.39 / API 1.68)
+
+- Request: send POST /tasks/{id}/complete only for task types that are actually handled in code; do not auto-complete unsupported tasks.
+- Changed worker behavior in king_games_product_manager/telegram_bot_tasks_worker.py:
+	- removed unsupported-task auto-complete behavior
+	- task completion is now executed only after successful handler execution
+	- accepted both `CHANGE_PRICE` and `PRICE_CHANGE` as aliases for the same supported flow
+	- unsupported task types are skipped and left pending with explicit log lines
+- Versions: frontend `2.39`, server API `1.68`.
+- Validation: Python compile succeeded for updated worker; no editor errors in changed runtime files.
+
+# 2026-08-02 - Telegram task stuck-point diagnostics + MG save verification (v2.38 / API 1.67)
+
+- Incident: user reported SAP update succeeds but MG site update does not complete and task cleanup is unclear.
+- Added deep worker diagnostics in king_games_product_manager/telegram_bot_tasks_worker.py:
+	- persistent log file writer at king_games_product_manager/logs/telegram_tasks_worker.log
+	- request/response logging for pending fetch and /tasks/{id}/complete calls
+	- full exception traceback logging (not only short error text)
+	- MG step-by-step logs: navigation URL/title, login detection, pre/post price DOM value, save click selector, post-save URL
+	- post-save persistence verification by reloading edit page and comparing expected vs actual inventory_price[0]
+- Added Telegram API diagnostics in C:/Projects/TelegramBot/api.py:
+	- logs for GET /tasks/pending count
+	- logs for POST /tasks/{id}/complete start, DB update, bot presence, telegram send success/failure, and final completion
+- Versions: frontend `2.38`, server API `1.67`.
+- Validation: live worker run processed task #14 end-to-end with explicit logs for SAP success, MG save verification (expected=actual), complete endpoint HTTP 200, and summary completed=1 failed=0. Pending queue check returned COUNT=0.
+
+# 2026-08-02 - Telegram worker hang fix + deterministic task completion (v2.37 / API 1.66)
+
+- Incident: `telegram_bot_tasks_worker.py` did not finish; it stalled on the SAP step and left pending tasks repeatedly in queue.
+- Root cause: SAP subprocess call in worker had no timeout guard, so the worker could block indefinitely while waiting for `sapService_UpdatePrdPrice.py`.
+- Fixed worker: added `SAP_SCRIPT_TIMEOUT_SEC` env-configurable timeout around subprocess execution with explicit timeout error handling.
+- Fixed worker: added optional auto-completion for unsupported request types via `TELEGRAM_AUTO_COMPLETE_UNSUPPORTED` (enabled by default) to prevent queue deadlock on currently unsupported task types.
+- Fixed SAP script: added request timeouts for login, patch, and logout calls to avoid indefinite network waits; login failures now return a proper failure state.
+- Versions: frontend `2.37`, server API `1.66`.
+- Validation: ran worker with short timeout (`SAP_SCRIPT_TIMEOUT_SEC=5`) and confirmed deterministic exit with summary, unsupported tasks marked complete, and queue reduced from 8 pending tasks to 1 failed `PRICE_CHANGE` task.
+
+# 2026-08-02 - Telegram bot tasks automation + MG/SAP price flow (v2.36 / API 1.65)
+
+- Request: build a scheduled process under עיבודים that reads pending tasks from `http://127.0.0.1:7999/tasks/pending`, add a menu entry תחת תוכניות שירות בשם משימות בוט טלגרם, process supported task types, and complete tasks via `POST /tasks/{task_id}/complete`.
+- Added: new worker script `king_games_product_manager/telegram_bot_tasks_worker.py`.
+- Implemented: queue ingestion and readable per-task console lines with task id, type, sku, price, status, and created time.
+- Implemented first handler: `request_type=PRICE_CHANGE`.
+- Implemented: SAP price update call via external script with CLI args (SKU and price).
+- Implemented: MG login-aware product edit flow and update of `inventory_price[0]` followed by save button `name=edit`.
+- Added: default automated process `משימות בוט טלגרם` every 5 minutes via `telegram_bot_tasks_worker.py`.
+- Added API: `GET /api/telegram-bot/tasks/pending` (proxy for queue display) and `POST /api/telegram-bot/tasks/process-now` (manual trigger).
+- UI: added sidebar item תחת תוכניות שירות and a dedicated view panel with queue viewer + refresh/run buttons.
+- Versions: frontend `2.36`, server API `1.65`.
+
+# 2026-07-29 - Restore proven MG auto-auth session (v2.35 / API 1.64)
+
+- Incident: the new desktop replacement login flow remained blocked even though the application already had a long-standing automatic MG authentication path on Chrome debug port 9225.
+- Root cause: the desktop tool preferred a separate unauthenticated 9222 session; after legacy authentication succeeded at `/apanel/home`, `ensure_logged_in()` navigated to `/apanel/`, which MG treats as the login page even for the working session.
+- Fixed: `get_driver()` now uses the proven `browser_manager.get_active_driver()` path first and keeps the newer browser path only as fallback.
+- Fixed: authenticated sessions inside `/apanel/` return immediately; authentication checks use `/apanel/home` and no longer navigate a valid session back to the root login route.
+- Verified: legacy credentials were accepted by MG, producing `MG CMS - דף הבית`; the desktop tool then preserved `/apanel/home`, found no visible login form, and completed authentication verification in 0.025 seconds.
+- Versions: frontend `2.35`, server API `1.64`.
+
+# 2026-07-29 - MG native form submission and password verification (v2.34 / API 1.63)
+
+- Incident: after correcting the duplicated email, MG still returned to its login form and the app displayed the generic `MG login failed. Check the email and password` message.
+- Evidence: the live MG form posts to `/apanel/home`, contains a rotating hidden token, and returned to `/apanel/` without visible error text.
+- Fixed: the automation now invokes `requestSubmit` on MG's original form and submit button, preserving the form token and native browser validation.
+- Fixed: login success/failure checks visible controls rather than treating hidden login elements as an active login form; visible MG response text is surfaced when available.
+- UX: added a local eye button so password characters can be verified before submission when the active keyboard layout is uncertain; closing the modal clears and remasks the field.
+- Security: password contents are not logged, stored, or inspected by diagnostics.
+- Verified: focused regression confirmed exact field assignment and invocation of the original MG form; Python compile and editor diagnostics passed.
+- Versions: frontend `2.34`, server API `1.63`.
+
+# 2026-07-29 - Exact MG login field assignment (v2.33 / API 1.62)
+
+- Incident: after submitting the in-app MG password, the MG login window showed a duplicated email whose periods were converted to Hebrew `ץ` characters.
+- Root cause: Selenium `clear()` did not reliably remove MG's prefilled email, while `send_keys()` was affected by the active Hebrew keyboard layout.
+- Fixed: login now selects visible enabled controls and replaces email/password through the native DOM value setter with `input` and `change` events, avoiding physical keyboard layout translation.
+- Safety: the exact assigned values are verified before clicking the visible login button; the password remains one-time and is not logged or stored.
+- Verified: a focused regression with a prefilled email confirmed one exact email value, an exact password value, and one submit click without keyboard typing.
+- Versions: frontend `2.33`, server API `1.62`.
+
+# 2026-07-29 - Integrated MG authentication recovery (v2.32 / API 1.61)
+
+- Fixed: desktop scan/apply no longer exposes an immediate operational failure when the shared MG session has expired.
+- Added: an in-app MG login modal appears automatically on HTTP 401 and resumes the original scan or apply action after successful authentication.
+- Security: the password uses a masked browser field, is sent only to the local server for a one-time Selenium login, is cleared from the DOM immediately, and is not stored in source, logs, settings, or the database.
+- Added: `/api/desktop-replacement/login` for one-time session creation; invalid credentials stay in the modal without restarting the desktop workflow.
+- Preserved: no stale hardcoded password retries, one browser session per apply run, one save per desktop, and post-save verification-based success counts.
+- Versions: frontend `2.32`, server API `1.61`.
+
+# 2026-07-29 - Single-pass desktop replacement apply (v2.31 / API 1.60)
+
+- Incident: the bulk apply loop ran replacements first and desktops second, opening the same desktops repeatedly and creating a new browser/login cycle for every replacement mapping.
+- Previous-run evidence: 11 form submissions were reported, but only 9 passed post-save verification; the UI incorrectly summarized submissions as successful saves.
+- Fixed: bulk apply now uses one authenticated Chrome session and processes each parent desktop exactly once.
+- Fixed: all component mappings relevant to a desktop are combined into one tree/text plan, one CMS save, and one post-save verification.
+- Fixed: each replacement carries its discovered `parent_ids`, so unrelated desktops are not scanned for that mapping.
+- Authentication: removed stale hardcoded password submission from this tool. An expired MG session now stops the entire run immediately with one actionable error and never retries credentials.
+- Reporting: success counts only computers that passed post-save verification; stopped runs report the number already verified.
+- Verified: two mappings on one desktop produce one apply and one verification while updating both tree slots and combined `content2` references.
+- Versions: frontend `2.31`, server API `1.60`.
+
+# 2026-07-29 - Desktop discovery selector and child-stock fix (v2.30 / API 1.59)
+
+- Fixed: category filtering now submits `form#filter` directly and waits for `tr.cat_96`, preventing scans of unfiltered products such as MG 75.
+- Fixed: `table_no.png` is accepted only inside the row validity link (`products&valid=ID&state=1`), excluding the unrelated XML-status icon present on normal product rows.
+- Safety: discovery cross-checks the category row class, `td.id`, validity-link ID, and edit-link ID before opening a desktop product.
+- Fixed: each `treeProductsItem` now receives only the sibling text belonging to that child, preventing one `במלאי: 0` marker from flagging every component in the tree.
+- Verified: MG 33608 exposes 11 tree components and only MG 33110 is detected as `במלאי: 0`.
+- Verified: replacement planning still updates `content`, `content2`, `description`, product links, product titles, and the tree component ID.
+- Versions: frontend `2.30`, server API `1.59`.
+
+# 2026-07-29 - Desktop component replacement redesign (v2.29 / API 1.58)
+
+- Request: rewrite the synchronization-center desktop component tool around MG admin category 96 discovery instead of a manually entered old/new product pair.
+- Implemented: authenticated admin scan of `/apanel/products`, category 96 filtering, `table_no.png` row selection, edit-link collection, and extraction of child products whose tree row contains `במלאי: 0`.
+- Implemented: unique missing-component list with one required replacement field per component, plus a separate list of unavailable parent desktops.
+- Implemented: bulk apply over the discovered parent desktop IDs, reusing the existing tree/text replacement, save, and verification behavior for every supplied mapping.
+- UX: reduced runtime output to start, warning, stop, and summary messages; apply remains disabled until every missing component has a replacement.
+- Versions: frontend `2.29`, server API `1.58`.
+
 # LIVE DEVELOPMENT HISTORY
 
 Purpose: single source of truth for every development request and what was done.
@@ -35,6 +179,325 @@ Policy: from now on, every requested change gets an entry.
 ---
 
 ## Entries\n
+### [ID: 20260729-01] [Status: completed]
+- Timestamp: 2026-07-29
+- Request: Reverse the colors in the price comparison report's "שינוי באחוזים" column so negative values are red and positive values are green.
+- Implementation: Reversed the percentage-difference color mapping in the shared comparison-table renderer: values beginning with `+` now use green and values beginning with `-` now use red. Bumped APP to 2.28 and updated the script cache key.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: VS Code diagnostics passed for app.js and index.html with no errors.
+- Outcome: Price comparison percentage changes now use the requested positive-green and negative-red convention.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260728-10] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: Stop diagnosing the Benda report fetch error and display its active SQL query directly in the report for manual review.
+- Implementation: Added a visible "שאילתת SQL פעילה" section above the Benda report results, showing the complete active RAZER/SCORPIUS/GLORIUS/GLORIOUS query in a readable left-to-right monospace block. Bumped APP to 2.27 and stylesheet cache to 1.17.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/style.css, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Not run; the user requested to inspect the query manually.
+- Outcome: The active Benda SQL query is now visible inside the report.
+- Follow-ups: User will review the query.
+
+---
+
+### [ID: 20260728-09] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: Change the Benda sales report query to filter RAZER, SCORPIUS, GLORIUS, and GLORIOUS instead of CORSAIR, without running tests.
+- Implementation: Replaced the CORSAIR description filter with SCORPIUS in GET `/api/sap/benda-sales`. Updated the report heading to match the new brands. Bumped API to 1.57 and APP to 2.26.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Not run at the user's explicit request; the user will verify the report.
+- Outcome: The Benda report now targets RAZER, SCORPIUS, GLORIUS, and GLORIOUS for the previous calendar month.
+- Follow-ups: User will verify the live report.
+
+---
+
+### [ID: 20260728-08] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: Duplicate the Benda sales report as "דוח מכר ויזואל" using the supplied previous-month SAP query for UGREEN, STEELSERIES, and GLORIOUS.
+- Implementation: Added GET `/api/sap/visual-sales` using the supplied OINV/INV1 SQL and existing SAP ODBC connection. Added a separate Reports menu item and report view with the same five-column white/black table, adapted brand title, localized formatting, and independent print button. Bumped API to 1.56, APP to 2.25, and stylesheet cache to 1.16.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/style.css, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Server compilation and VS Code diagnostics passed. The updated server started successfully. SAP and browser behavior checks were intentionally not run because the user requested to perform those checks personally.
+- Outcome: The Visual sales report is available under Reports with the requested query and matching Benda-report structure.
+- Follow-ups: User will verify the live report data and UI.
+
+---
+
+### [ID: 20260728-07] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: Add a report under Reports named "דוח מכר בנדא" that runs the supplied SAP invoice query for Razer, Corsair, Glorius, and Glorious products from the previous calendar month; show a white table with black text, the requested title, and a print button.
+- Implementation: Added GET `/api/sap/benda-sales` using the supplied OINV/INV1 SQL and existing SAP ODBC connection. Added the new Reports menu item and report view, safe text-only rendering for five columns, localized date/number formatting, a white/black report surface, and report-only print styling. Bumped API to 1.55, APP to 2.24, and stylesheet cache to 1.15.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/style.css, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Python compilation and VS Code diagnostics passed. Live SAP API smoke returned success with 19 rows and columns InvoiceNumber, InvoiceDate, ItemCode, ItemName, Quantity. Browser validation confirmed the exact title, 19 rendered rows, print button, white background, black text, report-only print visibility, and contained horizontal scrolling on a narrow viewport. Live API version is 1.55 and app version is 2.24.
+- Outcome: The new Benda sales report is live under Reports and can be printed independently from the application shell.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260728-06] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: Remove the AI agent timeout completely so OpenAI calls can wait without a time limit.
+- Implementation: Changed all three OpenAI clients (category prediction, full enrichment, and title-essence guard) to `timeout=None`. Kept `max_retries=0` so an unlimited call is never duplicated silently. Bumped API to 1.54 and APP to 2.23.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Python compilation and diagnostics passed. Focused source validation confirmed all three OpenAI client constructions use `timeout=None` and `max_retries=0`, with no numeric OpenAI timeout remaining.
+- Outcome: OpenAI calls no longer stop because of an application-level timeout; they wait until OpenAI responds, the user stops the run, or an external connection/process failure occurs.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260728-05] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: Explain and fix why OpenAI phase 2 took 125-128 seconds, which is operationally critical.
+- Implementation: Identified that the OpenAI SDK allowed a 75-second request with two silent internal retries, while phase 2 sent a 23K-character full enrichment prompt and generated a large structured response. Disabled hidden retries (`max_retries=0`), set a 60-second hard request timeout, compacted the OpenAI prompt by removing duplicated attribute-option data, forced `IMAGES=[]` because images are handled locally, and added prompt-character/input-token/output-token telemetry to both phase logs. Added the missing graphics-card title rule and category-148 title recovery. Added `OpenAI GPT-4o Mini (מהיר)` and relabeled GPT-4.1 Mini as balanced. Bumped API to 1.53 and APP to 2.22.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/title_header_rules.json, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Prompt size for category 148 dropped from 22,437 to 16,227 characters. A controlled GPT-4o Mini run completed phase 1 in 5.76 seconds and phase 2 in 31.06 seconds; phase 2 reported 16,218 prompt characters, 6,859 input tokens and 2,382 output tokens. Category 148 remained locked and no worker was left running.
+- Outcome: Silent multi-minute retries are eliminated, logs expose request size/tokens, and the measured fast-model phase-2 latency dropped from 125.68 to 31.06 seconds.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260728-04] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: Fix OpenAI misclassification and low confidence for graphics-card product 36216, reduce prediction latency, and log the provider/model before both AI calls.
+- Implementation: Added deterministic graphics-card detection and category 148 override for explicit `כרטיס מסך` / graphics-card titles. Replaced OpenAI phase-1 full enrichment with a four-field category-only structured-output call. Added GPT-5 minimal reasoning/low verbosity/output limits, plus `OpenAI GPT-4.1 Mini (מהיר)` as a transparent faster option. Added start/completion timing logs for phase 1 and phase 2 with provider and model, and renamed the provider-neutral title check to `[AI Guard]`. Bumped API to 1.52 and APP to 2.21.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Compilation and diagnostics passed. Live focused GPT-5 Mini phase-1 tests for product 36216 returned category 148 with 100% confidence in 3.36-4.42 seconds. A controlled full non-publishing run with GPT-4.1 Mini logged both calls, locked category 409 to 148 at 100%, completed phase 1 in 3.83 seconds and phase 2 in 40.75 seconds, and passed title essence at 95%.
+- Outcome: Explicit graphics-card products cannot be misrouted by low-confidence AI. OpenAI category prediction is fast, both calls are visible in the log, and a faster full-enrichment model is selectable.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260728-03] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: Add OpenAI as an AI agent for product ingestion, with one additional entry in the prediction-engine combo and the required Python package.
+- Implementation: Added OpenAI Responses API structured-output transports for both enrichment phases and the title-essence guard. Added `OpenAI GPT-5 Mini` as the first combo option while retaining Gemini as the default. Routed provider/model through UI, server validation and CLI ingestion. Added `openai>=1.68.0`, installed SDK 2.49.0, and added safe `.env` handling for `OPENAI_API_KEY`. Bumped APP to 2.20 and API to 1.51.
+- Files changed: requirements.txt, .gitignore, king_games_product_manager/.gitignore, king_games_product_manager/product_scraper_engine/.env.example, king_games_product_manager/product_scraper_engine/README.md, king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Python compilation and diagnostics passed. OpenAI enrichment structured-output and title-guard mocks passed through SDK 2.49.0. Provider routing passed from UI through server and CLI. Live API 1.51 / APP 2.20 assets passed. After replacing the local key, the account model list confirmed `gpt-5-mini`, a live title guard returned 100% same-product essence, and a live structured-output enrichment completed successfully in 28.32 seconds with Hebrew JSON, decoding and usage metadata.
+- Outcome: OpenAI is fully integrated, configured and live-tested for product ingestion.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260727-04] [Status: completed]
+- Timestamp: 2026-07-27
+- Request: לתקן את התצוגה המכוערת של הטקסט `טרם נקלט מחירון` במסך `ניהול ספקים ואנשי קשר`.
+- Implementation: עמודת תאריך קליטת המחירון הועברה מ-`Font Awesome 6 Free`, שהוא גופן סמלים שאינו מיועד לטקסט עברי, אל גופן הטקסט הראשי `var(--font-family)`. התיקון הוחל גם על נתוני API וגם על תצוגת fallback. גרסת APP ו-cache bust עודכנו ל-`2.14`.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: חיפוש ממוקד אישר ששני מסלולי הרינדור של `טרם נקלט מחירון` משתמשים ב-`var(--font-family)`; דיאגנוסטיקת VS Code נקייה עבור app.js ו-index.html; נבדקה הגרסה המוגשת מהשרת.
+- Outcome: completed. הטקסט ותאריכי הקליטה בטבלת ניהול הספקים מוצגים בגופן הטקסט הרגיל של המערכת.
+- Follow-ups: לרענן את הדפדפן כדי לקבל `app.js?v=2.14`.
+
+---
+
+### [ID: 20260728-02] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: In the supplier-pricelist results screen, replace "סיכום חילוץ מפייב לפי TAB" with "תוצאות עיבוד קובץ מחירון מ [שם הספק]".
+- Implementation: Replaced the static heading with a supplier-aware title using the active supplier name. Escaped the supplier value before rendering and added `ספק לא ידוע` as a fallback. Bumped APP to 2.19.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Frontend diagnostics and focused heading/escaping assertions passed. Live APP 2.19 verification confirmed the supplier-aware heading is served and the previous heading is absent.
+- Outcome: The extraction summary heading identifies the supplier whose pricelist was processed.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260728-01] [Status: completed]
+- Timestamp: 2026-07-28
+- Request: After clicking "נתח מחירון ספק", open the category-selection screen with every checkbox selected by default.
+- Implementation: Changed the preprocess modal so every category-tree checkbox and every detected-tab checkbox starts selected on each new analysis, regardless of previously saved disabled states. Manual deselection inside the open modal remains available. Removed the obsolete saved-tab-state helper and bumped APP to 2.18.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Frontend diagnostics passed. Live APP 2.18 verification confirmed every valid category defaults to selected, every tab checkbox is rendered with `checked`, and the obsolete saved-state helper is absent.
+- Outcome: All checkbox fields in the supplier pricelist category-selection screen are selected by default.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260727-07] [Status: completed]
+- Timestamp: 2026-07-27
+- Request: Change the font in every terminal/log output area to a more readable monospace font at 14px.
+- Implementation: Updated the shared `.terminal-log` style used by all eight static and dynamic log terminals from the Font Awesome icon font at 13px to `Cascadia Mono`, `Consolas`, `Courier New`, `monospace` at 14px. Bumped APP to 2.17 and the stylesheet cache key to 1.14.
+- Files changed: king_games_product_manager/style.css, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Diagnostics passed for all changed frontend files. Live asset verification confirmed APP 2.17, CSS 1.14, and the requested 14px monospace stack across five static and three dynamic terminal-log instances.
+- Outcome: Terminal logs now render in a readable fixed-width font at the requested size without changing normal application text.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260727-06] [Status: completed]
+- Timestamp: 2026-07-27
+- Request: Expand the ingestion AI selector from ten choices to the complete list of compatible Gemini prediction models.
+- Implementation: Expanded the UI selector and server allowlist from 10 to all 20 text/JSON prediction models currently returned by the account's Gemini `generateContent` API. Kept `gemini-3.1-flash-lite` as the default. Excluded 21 specialty endpoints for image generation, TTS, music, robotics, computer use, and dedicated research because they are not compatible with the product JSON prediction flow. Bumped APP to 2.16 and API to 1.50.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Direct API comparison confirmed all 20 selectable models exist in the live account model list and the UI options exactly match the server allowlist. Live smoke test confirmed API 1.50, APP 2.16, 20 unique options, and Gemini 3.1 Flash Lite as the default.
+- Outcome: The ingestion console now exposes the complete compatible Gemini text-model list rather than an arbitrary ten-model subset.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260727-05] [Status: completed]
+- Timestamp: 2026-07-27
+- Request: Add a selectable AI model list to the automatic product ingestion console, defaulting to Gemini 3.1.
+- Implementation: Added a ten-model Gemini selector directly above the ingestion start button; passed the selected `ai_model` through the frontend request, server-side allowlist, CLI runtime flags, both enrichment phases, and the title-similarity guard. The default is `gemini-3.1-flash-lite`. Only model names confirmed by the account's Gemini `generateContent` model-list endpoint were included; nonexistent 5.5/5.6 names were not fabricated. Bumped APP to 2.15 and API to 1.49.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, king_games_product_manager/update_products_batch_2.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl.
+- Verification: Gemini model-list endpoint confirmed all ten choices; focused AST/runtime check confirmed CLI default/override parsing and all three AI call sites use the selected model; diagnostics passed for all changed application files; live server smoke test confirmed API 1.49, APP 2.15, the default selection, and all ten model options.
+- Outcome: Users can choose the Gemini prediction model before starting ingestion, with Gemini 3.1 Flash Lite selected by default.
+- Follow-ups: None.
+
+---
+
+### [ID: 20260727-03] [Status: completed]
+- Timestamp: 2026-07-27
+- Request: להחליף בכל קוד המערכת שימוש ב-`font-family: monospace` ל-`Font Awesome 6 Free`.
+- Implementation: הוחלפו 37 הצהרות font ב-app.js, index.html ו-style.css, כולל fallback של Consolas/Monaco שהסתיים ב-monospace. Font Awesome 6.4.0 כבר נטען במסמך. גרסת APP עודכנה ל-`2.13`, cache bust של app.js עודכן ל-`2.13` ושל style.css ל-`1.13`.
+- Files changed: king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/style.css, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: חיפוש בקוד היישום אישר אפס מופעי `monospace` ו-37 מופעי `Font Awesome 6 Free`; דיאגנוסטיקת VS Code נקייה עבור app.js, index.html ו-style.css. חיפוש workspace מצא רק ארבעה מופעים בקבצי build של תוסף PDF צד שלישי בתוך chrome-profile-chatgpt-visible, שאינם קוד המערכת ולא שונו.
+- Outcome: completed. כל שימושי monospace בקוד KINGGAMES הפעיל הוחלפו ל-`Font Awesome 6 Free`.
+- Follow-ups: לרענן את הדפדפן כדי לקבל את גרסאות ה-JS וה-CSS המעודכנות.
+
+---
+
+### [ID: 20260727-02] [Status: completed]
+- Timestamp: 2026-07-27
+- Request: כאשר `שימוש במנוע חיפוש תמונות` אינו מסומן, למנוע כל קריאה למנוע חיפוש תמונות, לרבות Morlevi Supplier Prefetch.
+- Implementation: ה־Supplier Prefetch המוקדם ב-enricher הוכפף ל-`img_scrpt == on`. כאשר הדגל כבוי לא נבחר fetcher לפי ספק/יצרן ולא מופעל `fetch_context`, בשתי פאזות ההעשרה. שלב ה-AI והעלאת תמונות מקומיות ממשיכים ללא שינוי. גרסאות עודכנו ל-API `1.48` ול-APP `2.12`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקת התנהגות עם mock שזורק שגיאה בכל קריאה ל-`selenium_fetcher.get_fetcher` הסתיימה בהצלחה עם `img_scrpt=off` וספק מור לוי, והוכיחה שאין בחירת fetcher או קריאת מנוע כשהאפשרות כבויה. בוצעו גם קומפילציה ובדיקת נגד עבור מצב `on`.
+- Outcome: completed. ביטול הסימון מונע כעת כל קריאה למנועי חיפוש התמונות, כולל prefetch מוקדם של ספקים.
+- Follow-ups: בוצע restart לשרת ונבדקה גרסת ה-API הפעילה.
+
+---
+
+### [ID: 20260727-01] [Status: completed]
+- Timestamp: 2026-07-27
+- Request: במסוף הזנת מוצרים אוטומטית לתקן את חיפוש התמונות המקומיות מהנתיב השגוי `C:\Temp\ProducsImages` לנתיב `C:\Temp\productsImages`.
+- Implementation: עודכן נתיב בסיס התמונות בקבוע השרת, בכל ברירות המחדל והבקשות בצד הלקוח, בתצורת עשרת ספקי התמונות, בטקסטים המוצגים במסך, ב-runner של חילוץ תמונות, במנגנון חיפוש התמונות המקומי של הזנת המוצרים ובסקריפט ASUS. גרסאות עודכנו ל-API `1.47` ול-APP `2.11`, כולל cache bust של `app.js`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, king_games_product_manager/supplier_image_scripts.json, king_games_product_manager/supplier_image_extraction_runner.py, king_games_product_manager/update_products_batch_2.py, king_games_product_manager/helper_scripts/image_extractors/LOAD_IMAGES_ASUS_ROG_new.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור כל ארבעת קובצי Python ששונו; JSON ספקים נטען בהצלחה; דיאגנוסטיקת VS Code נקייה עבור קובצי ה-runtime המרכזיים; חיפוש ממוקד אישר שלא נשאר `ProducsImages` בקוד Python/JS/HTML או בתצורת JSON הפעילה.
+- Outcome: completed. מסוף ההזנה וכל מסלולי הביצוע הפעילים מחפשים ושומרים תמונות תחת `C:\Temp\productsImages`.
+- Follow-ups: בוצע restart לשרת ונבדקה גרסת ה-API הפעילה.
+
+---
+
+### [ID: 20260722-05] [Status: completed]
+- Timestamp: 2026-07-22
+- Request: במסך עדכון קטגוריות למוצרים להעביר את הכפתורים `קליטת קובץ MG` ו-`ייצוא ל-MG` לאותו מיקום במסך ניהול מוצרים תחת `ייבוא קובץ מוצרים גדול מ-MG`, ולוודא שכפתור `קליטת קובץ MG גדול` עושה אותה פעולה בדיוק כמו כפתור הייבוא שהועבר.
+- Implementation: הועברו פעולות MG למסך `ניהול מוצרים` תחת בלוק `ייבוא קובץ מוצרים גדול מ-MG`: כפתור `קליטת קובץ MG גדול` וכפתור `ייצוא ל-MG`. הכפתורים העליונים הוסרו ממסך `עדכון קטגוריות למוצרים`. בלוק הייבוא/ייצוא הישן הוסר ממסך הדיאגנוסטיקה כדי למנוע IDs כפולים. קוד הייבוא אוחד כך שכפתור `crawlerMgImportBtn` מפעיל את אותו flow של `runMgImport({ fileObj })` מול `/api/mg/import/start`, עם סטטוס ולוגים חיים. כפתור הייצוא שהועבר נשאר על פעולת הייצוא הישנה מול `/api/mg/export` ומשתמש בסינון הנוכחי של מסך ניהול מוצרים. גרסאות עודכנו ל-API `1.46` ו-APP `2.10`.
+- Files changed: king_games_product_manager/index.html, king_games_product_manager/app.js, king_games_product_manager/server.py, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: חיפוש HTML אישר שאין יותר `mgImportBtn`/`mgExportBtn` במסך עדכון קטגוריות ושיש מופע יחיד של `crawlerMgImportBtn`/`crawlerMgExportBtn` במסך ניהול מוצרים. חיפוש JS אישר handler יחיד לייבוא MG ושכפתור הייצוא משתמש ב-`/api/mg/export`. `get_errors` נקי עבור `index.html`, `app.js`, `server.py`; `py_compile server.py` עבר.
+- Outcome: completed.
+- Follow-ups: לרענן את הדפדפן כדי לקבל `app.js?v=2.10`; פעולות MG נמצאות כעת בראש ניהול מוצרים.
+
+---
+
+### [ID: 20260722-04] [Status: completed]
+- Timestamp: 2026-07-22
+- Request: בפייב, מוצר `KB-VANTAR` מופיע בטבלת "רשימת שורות מהקובץ לאחר מיפוי" כחישוב שקלי למרות שתא המחיר באקסל הוא תא דולרי; להסביר למה ולתקן.
+- Implementation: נמצא שהמסלול הכללי של Excel כבר ידע להסיק מטבע מפורמט תא, אבל הטרנספורמר הייעודי של Five עקף אותו והניח `USD` רק עבור טאב `NOCTUA`; לכן `KB-VANTAR` בטאב `COUGAR ACC` עם פורמט תא `[$$-409]#,##0` סומן בטעות כ-`ILS`. עודכן `_transform_five_excel_to_csv_data` לקרוא את `number_format` מתא המחיר, להסיק `USD/ILS` עם `_infer_currency_from_excel_number_format`, ולהמיר לשקלים לפי המטבע בפועל לפני חישוב מחיר סופי ומכפיל מחיר. גרסאות עודכנו ל-API `1.45` ו-APP `2.09`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: לפני התיקון, בדיקת HTTP החזירה עבור `KB-VANTAR` את `raw_price=35`, `currency=ILS`, `final_price=59`; בדיקת התא באקסל אישרה `price_format=[$$-409]#,##0`. אחרי התיקון, בדיקה פנימית של Five החזירה `summary_total=342`, `currency=USD`, `raw_price=35`, `final_price=169`. אחרי restart ל-API `1.45`, smoke HTTP מלא מול `/api/supplier/analyze` החזיר `summary_total_extracted=342`, `preview_rows=342`, `sum_result_rows=342`, ועבור `KB-VANTAR`: `price=169`, `currency=USD`, `raw_price=35`, `final_price=169`.
+- Outcome: completed.
+- Follow-ups: לרענן את הדפדפן כדי לקבל `app.js?v=2.09`; טבלת השורות לאחר מיפוי אמורה להציג את המטבע כ-USD ואת המחיר המחושב אחרי המרה.
+
+---
+
+### [ID: 20260722-03] [Status: completed]
+- Timestamp: 2026-07-22
+- Request: אחרי תיקון מיפויי הטאבים עדיין מתקבלים כ-120 מוצרים במקום 342 בפייב; לבצע בדיקה מקיפה ויסודית ולתקן את הסיבה האמיתית.
+- Implementation: שוחזר הקובץ `FiveExits July-01-2026 .xlsx` מקומית. נמצא שהחילוץ מפייב תקין ומפיק 342 שורות, אבל סינון המיפוי אחרי החילוץ השווה שמות טאבים בצורה מדויקת. שורות פייב נשמרו עם שמות מוגדרים כמו `COUGAR GAMING` / `ANTEC PSU`, בעוד המיפוי השמור החזיק שמות גיליון אמיתיים כמו `COUGAR Gaming` / `ANTEC Psu`; לכן רק התאמות exact שרדו. עודכן סינון הטאבים להשתמש ב-`_normalize_sheet_name`, ובמסלולי חילוץ אוטומטיים (`five_excel_tabs`, `visual_excel_tabs`, `techno_excel_tabs`) הוסרה תלות ב-`tab_enabled` היסטורי של מיפוי שמור; רק `selected_tabs` מפורש מהמודאל הנוכחי מסנן שורות. גרסאות עודכנו ל-API `1.44` ו-APP `2.08`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: שחזור פנימי הראה `summary_total=342`; לפני התיקון סינון שמות exact נתן כ-120/123 בהתאם לטאבים שתואמים בדיוק; אחרי נרמול וביטול סינון מיפוי שמור במסלול אוטומטי מתקבל `after_saved_mapping_filter=342`; `py_compile` עבר עבור `server.py`; diagnostics נקיים; השרת אותחל ל-API `1.44`; smoke HTTP מלא מול `/api/supplier/analyze` על `FiveExits July-01-2026 .xlsx` החזיר `summary_total_extracted=342`, `preprocess_total_rows=342`, `preview_rows=342`, ו-`new_products=31`, `updated_products=309`, `unchanged_count=2`, סה"כ `342`.
+- Outcome: completed.
+- Follow-ups: להפעיל שוב ניתוח פייב במסך; הטבלה לאחר מיפוי צריכה להתיישר עם סיכום החילוץ כאשר לא נבחר סינון טאבים מפורש.
+
+---
+
+### [ID: 20260722-02] [Status: completed]
+- Timestamp: 2026-07-22
+- Request: לבדוק את מנגנון שמירת המיפויים כי מיפויי טאבים לא נשמרים נכון, למשל בטכנו נשמר רק חלק מהטאבים/לא נשמרו שאר הטאבים.
+- Implementation: נמצא שמיפוי טכנו שמור כ-`tabs=[]` גם ברמת ספק וגם ברמת מחירון, ושמירת מיפוי בצד השרת החליפה את כל מערך `tabs` במה שהגיע מהדפדפן. נוסף helper `_merge_tab_field_mappings` שממזג טאבים לפי `tab_name` במקום למחוק טאבים שלא הגיעו בבקשה, כולל merge פנימי של `field_mapping`, `field_text_mapping`, `field_search_mapping`, `import_toggles`, ו-`display_toggles`. עודכן endpoint שמירת מיפוי מחירון ו-endpoint שמירת מיפוי ספק להשתמש ב-merge. בנוסף נוסף fallback לטכנו: אם אין טאבים שמורים, `techno_excel_tabs` מחזיר כברירת מחדל את `Computing` ו-`Printing` עם מיפוי העמודות הקבוע. גרסאות עודכנו ל-API `1.43` ו-APP `2.07`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `server.py`; בדיקת merge אישרה ששמירת `Computing` בלבד משמרת את `Printing` וגם לא מוחקת `raw_price` מתוך `field_mapping`; בדיקת טעינת טכנו אישרה שברירת המחדל מחזירה `['Computing', 'Printing']` גם כשהמיפוי השמור ריק; diagnostics נקיים.
+- Outcome: completed.
+- Follow-ups: אם יש מיפויים מותאמים אישית שכבר נמחקו בעבר, הם לא קיימים ב-DB/legacy ולכן צריך לסרוק שוב קובץ דוגמה או להגדיר אותם מחדש; מכאן והלאה שמירה חלקית לא אמורה למחוק טאבים אחרים.
+
+---
+
+### [ID: 20260722-01] [Status: completed]
+- Timestamp: 2026-07-22
+- Request: במסך קליטת מחירון ספק, בזמן `התחל ניתוח מחירון`, לזהות אם עמודת מחיר באקסל מוגדרת כ-CURRENCY פנימי בדולר או בשקל ולהשתמש במטבע הזה בחישוב.
+- Implementation: במסלול Excel הכללי של קליטת מחירוני ספק, `_build_normalized_rows_from_excel_data` כבר לא קורא `openpyxl` עם `values_only=True` בלבד אלא שומר גם את `cell.number_format` לכל תא. נוסף helper `_infer_currency_from_excel_number_format` שמזהה `USD/$/dollar` כדולר ו-`ILS/NIS/shekel/he-IL/₪/שח/שקל` כשקל. אם אין עמודת מטבע ממופה או ערך מטבע מפורש, המערכת מסיקה את המטבע מפורמט תא המחיר ומשתמשת בו ב-`_resolve_pricing_with_tab_options`. ערך מטבע מפורש עדיין מקבל עדיפות ולא נדרס. גרסאות עודכנו ל-API `1.42` ו-APP `2.06`.
+- Files changed: king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `server.py`; smoke Excel בזיכרון עם שתי שורות מחיר `100` הראה שפורמט `[$$-409]` מחזיר `currency=USD` ו-`final_price=469`, ופורמט `[$ILS-he-IL]` מחזיר `currency=ILS` ו-`final_price=159`; diagnostics נקיים.
+- Outcome: completed.
+- Follow-ups: בקבצי CSV אין פורמט תא ולכן אין דרך לשחזר מטבע מפורמט פנימי; עבור CSV עדיין צריך עמודת מטבע או מיפוי טקסט קבוע.
+
+---
+
+### [ID: 20260721-09] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: לטפל בכך שהריצה עדיין מדפיסה `Gemini transient HTTP 503 (attempt 3/6)` אחרי מעבר ל-fallback.
+- Implementation: נמצא שה-resolver למודל הופעל במסלול CLI בלבד, בעוד שהריצה דרך השרת קוראת ישירות ל-`enrich_single_product` ומשם ל-`call_gemini_api` עם `model="gemini-3.5-flash"`. הועבר פתרון המודל לתוך נקודת הקריאה ל-Gemini עצמה (`call_gemini_api`) וגם לתוך `compare_title_essence_with_gemini`, כך שכל runtime path דרך השרת משתמש בפועל ב-`gemini-3.1-flash-lite` כשהמודל המבוקש הוא `gemini-3.5-flash`. גרסאות עודכנו ל-API `1.41` ו-APP `2.05`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `enricher.py`; smoke ישיר ל-resolver ול-`generateContent` אישר `gemini-3.5-flash -> gemini-3.1-flash-lite` עם תשובת `{"ok": true}`; smoke ingestion על מוצר `36009` הדפיס `Using Gemini model 'gemini-3.1-flash-lite' instead of requested 'gemini-3.5-flash'` בשתי קריאות ה-AI ולא הדפיס 503; diagnostics נקיים; השרת אותחל ואומת על API `1.41`.
+- Outcome: completed.
+- Follow-ups: להריץ מחדש את המוצרים לאחר restart; לוג הריצה אמור להדפיס שהמודל המבוקש הוחלף ל-`gemini-3.1-flash-lite` לפני הקריאה.
+
+---
+
+### [ID: 20260721-08] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: לבדוק למה Gemini עדיין לא עובד אחרי החלפת המפתח, ולתקן אם המפתח החדש עושה בעיות.
+- Implementation: אומת שהמפתח החדש תקין ומחזיר רשימת מודלים (`AQ.Ab8...jxh_Q`, hash `e4e1d2430229`), אבל `generateContent` על `gemini-3.5-flash` מחזיר `503 UNAVAILABLE` בגלל עומס גבוה. בדיקות ישירות הראו ש-`gemini-3.1-flash-lite`, `gemini-3.1-flash-lite-preview`, ו-`gemini-flash-lite-latest` עובדים. עודכן `choose_model_name` כך שבקשות ל-`gemini-3.5-flash` ול-`gemini-1.5-flash` יעדיפו קודם `gemini-3.1-flash-lite`. גרסאות עודכנו ל-API `1.40` ו-APP `2.04`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: בדיקת models מול המפתח החדש החזירה 50 מודלים; probe ישיר ל-`gemini-3.5-flash` החזיר 503 high demand; probe ישיר ל-`gemini-3.1-flash-lite` עם `responseSchema` החזיר `{"ok": true}`; resolver מחזיר כעת `gemini-3.1-flash-lite` עבור בקשה ל-`gemini-3.5-flash`; `py_compile` ו-diagnostics עברו.
+- Outcome: completed.
+- Follow-ups: להריץ מחדש את רשימת המוצרים; המערכת תשתמש במודל `gemini-3.1-flash-lite` במקום המודל העמוס.
+
+---
+
+### [ID: 20260721-07] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: לטפל באזהרת `Gemini transient HTTP 503` בזמן פרדיקציה, כדי שריצה לא תיפול בגלל עומס זמני של Gemini.
+- Implementation: ב-`product_scraper_engine/enricher.py` הוגדלה עמידות קריאות Gemini: קריאת enrichment הראשית עלתה מ-3 ל-6 ניסיונות, timeout עלה מ-60 ל-90 שניות, וה-backoff מוגבל עד 60 שניות; גם בדיקת title essence guard עלתה מ-2 ל-4 ניסיונות ומשתמשת באותו cap. גרסאות עודכנו ל-API `1.39` ו-APP `2.03`.
+- Files changed: king_games_product_manager/product_scraper_engine/enricher.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `enricher.py`; diagnostics נקיים; הלוג אישר שה-503 היה transient והריצה נעצרה ידנית לפני ניסיון 3; validation נוסף הורץ אחרי עדכון הגרסאות והתיעוד.
+- Outcome: completed.
+- Follow-ups: להריץ מחדש את רשימת המוצרים; במקרה של 503, המערכת תחכה ותנסה עד 6 פעמים לפני כשל סופי.
+
+---
+
+### [ID: 20260721-06] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: לבדוק את שגיאת `missing_prediction_marketing_points` עבור מוצר `36024` אחרי פרדיקציה ופרסום לאתר.
+- Implementation: נמצא ש-Phase-1 מול Gemini נכשל בגלל `API_KEY_INVALID`, ולכן לא נוצר payload חדש עם `PRODUCT_FACTS`; בנוסף נמצא שבכשל Phase-1 המוצר נכנס ל-`failed_list` אבל לא נחסם לשלב MG publish, ולכן publish ניסה payload שמור/לא תקין והציג `missing_prediction_marketing_points`. עודכן `update_products_batch_2.py` כך שכל כשל Phase-1 מוסיף את המוצר ל-`BLOCK_PUBLISH_PRODUCT_IDS` ומונע ניסיון פרסום עם payload ישן. גרסאות עודכנו ל-API `1.38` ו-APP `2.02`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py`; diagnostics נקיים לקובץ; בדיקת Gemini מול המפתח הנוכחי החזירה `INVALID_ARGUMENT: API key not valid`, ולכן נדרש להחליף את `GEMINI_API_KEY` בסביבת השרת לפני rerun; השרת אותחל מחדש ואומת מול `/api/health/version`.
+- Outcome: completed.
+- Follow-ups: להגדיר `GEMINI_API_KEY` תקין בסביבת השרת, לאתחל את השרת, ואז להריץ מחדש את המוצרים שנכשלו בפרדיקציה.
+
+---
+
+### [ID: 20260721-05] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: בעדכון האתר אחרי פרדיקציה, לוודא תמיד ששדה `xml` לא מסומן.
+- Implementation: נוספה כפייה ב-`update_products_batch_2.py` כך שכל payload של פרסום מוצר ל-MG כולל `xml: False`; במודול החיצוני `C:\Projects\AgentUpdateMGsystem\update_product.py` נוסף override קשיח בתחילת `update_product_in_apanel` שמגדיר `xml=False` לכל קריאה, ונוסף `xml` לרשימת הצ'קבוקסים הסטנדרטיים כדי להסיר סימון קיים באתר. גרסאות עודכנו ל-API `1.37` ו-APP `2.01`.
+- Files changed: king_games_product_manager/update_products_batch_2.py, C:\Projects\AgentUpdateMGsystem\update_product.py, king_games_product_manager/server.py, king_games_product_manager/app.js, king_games_product_manager/index.html, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: `py_compile` עבר עבור `update_products_batch_2.py`, `server.py`, ו-`C:\Projects\AgentUpdateMGsystem\update_product.py`; smoke ללא דפדפן אישר שקריאה ל-updater עם `xml=True` נרשמת כ-`xml=False` לפני ניסיון Selenium; diagnostics נקיים לקבצים שנערכו; JSONL תקין; השרת אותחל מחדש ו-`/api/health/version` החזיר API `1.37`.
+- Outcome: completed.
+- Follow-ups: none.
+
+---
+
+### [ID: 20260721-04] [Status: completed]
+- Timestamp: 2026-07-21
+- Request: לקרוא את `C:\Temp\prdUrls.txt`, להתאים כל מק"ט ספק לשדה SKU0/`supplier1_sku`, ולעדכן את `ProductSupplierURL` בלינק מהקובץ.
+- Implementation: נקרא קובץ `C:\Temp\prdUrls.txt` בפורמט `SKU ; URL`; בוצעה התאמה מדויקת מול `king_games_product_manager/products.db` לפי `supplier1_sku`; נוצר גיבוי DB לפני שינוי; עודכן `ProductSupplierURL` לכל רשומות המוצרים התואמות.
+- Files changed: king_games_product_manager/products.db, king_games_product_manager/products_backup_before_prdUrls_20260721_135737.db, LIVE_DEVELOPMENT_HISTORY.md, LIVE_DEVELOPMENT_HISTORY.jsonl
+- Verification: dry-run מצא 140 שורות תקינות, 0 שורות לא תקינות, 0 מק"טים ללא התאמה, 141 רשומות מוצרים תואמות; העדכון שינה 140 רשומות; אימות חוזר מצא 141 רשומות מאומתות, 0 חוסרים ו-0 mismatch. מוצר 35947 קיבל `https://techno-rezef.com/products/lenovo-neo-50q-g6-u7-256v-16gb-512gb-w11p-3y`.
+- Outcome: completed.
+- Follow-ups: none.
+
+---
+
 ### [ID: 20260721-03] [Status: completed]
 - Timestamp: 2026-07-21
 - Request: Prediction still failing for product 35947 due to Gemini Guard blocking it for low title similarity, even when 'same_essence' is true.

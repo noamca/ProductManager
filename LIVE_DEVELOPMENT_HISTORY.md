@@ -1,3 +1,16 @@
+# 2026-08-03 - Worker support for SAP_PRICE_UPDATE_EXISTING tasks
+
+- Issue: worker log showed `Task #25 skipped: unsupported request_type 'SAP_PRICE_UPDATE_EXISTING'`.
+- Root cause: `process_task()` in [king_games_product_manager/telegram_bot_tasks_worker.py](king_games_product_manager/telegram_bot_tasks_worker.py) had no routing branch for `SAP_PRICE_UPDATE_EXISTING`.
+- Fix:
+	- Added `handle_sap_price_update_existing_task()` for SAP-only price updates.
+	- Added `process_task()` branch for `request_type == "SAP_PRICE_UPDATE_EXISTING"`.
+	- Flow now validates `sku` + `price`, runs SAP price-list update script, and marks task complete only on success.
+	- This event intentionally does not update MG inventory page.
+- Validation:
+	- `py_compile` passed for `telegram_bot_tasks_worker.py`.
+	- diagnostics (`get_errors`) returned no errors.
+
 # 2026-08-03 - Stock comment text + SAP_PRICE_UPDATE_EXISTING API (API 1.72)
 
 - Request:

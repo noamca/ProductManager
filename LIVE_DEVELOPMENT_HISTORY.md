@@ -1,3 +1,73 @@
+# 2026-08-03 - Stock comment text + SAP_PRICE_UPDATE_EXISTING API (API 1.72)
+
+- Request:
+	- Add inventory update note text: "עודכן בתאריך XXX באמצעות בוט טלגרם".
+	- Add handling for event `SAP_PRICE_UPDATE_EXISTING` via API that updates SAP price list 3 by `sku` + `price`.
+- Implemented:
+	- Updated inventory document comment in [king_games_product_manager/telegram_bot_tasks_worker.py](king_games_product_manager/telegram_bot_tasks_worker.py):
+		- comments now include: `עודכן בתאריך YYYY-MM-DD באמצעות בוט טלגרם` plus SKU and warehouse.
+	- Added backend API in [king_games_product_manager/server.py](king_games_product_manager/server.py):
+		- `POST /api/sap/price-update-existing`
+		- body: `{ "sku": "...", "price": <number> }`
+		- runs SAP updater script against price list `3`.
+		- validates input and returns structured success/failure payload.
+	- Bumped backend version: `SERVER_API_VERSION` from `1.71` to `1.72`.
+- Validation:
+	- `py_compile` passed for `telegram_bot_tasks_worker.py` and `server.py`.
+	- diagnostics (`get_errors`) returned no errors for edited files.
+
+# 2026-08-03 - Telegram UPLOAD_PRODUCT handler with SAP warehouse stock set
+
+- Request: support `UPLOAD_PRODUCT` tasks from `http://localhost:7999/tasks/pending` so the worker updates SAP stock by task params: `SKU`, `LOCATION`, `QUANTITY` (including `0`).
+- Implemented in [king_games_product_manager/telegram_bot_tasks_worker.py](king_games_product_manager/telegram_bot_tasks_worker.py):
+	- added `UPLOAD_PRODUCT` branch in `process_task()`.
+	- added robust payload extraction with compatibility support for `location`/`LOCATION`, `quantity`/`QTY`, and legacy JSON payload embedded in `sku`.
+	- added SAP Service Layer stock-sync flow:
+		- login (`/Login`), read current warehouse stock from `Items(...).ItemWarehouseInfoCollection`, compute delta to target quantity.
+		- post `InventoryGenEntries` for positive delta or `InventoryGenExits` for negative delta.
+		- verify final warehouse stock equals requested target quantity.
+	- task is marked complete only after successful SAP stock update.
+- Notes:
+	- quantity `0` is explicitly supported.
+	- missing or invalid `SKU`/`LOCATION`/`QUANTITY` raises clear errors and prevents completion.
+
+# 2026-08-03 - TASKEY period selector hotfix: explicit date range query (v2.44)
+
+- Issue: the new period combo existed, but backend in runtime still returned current-month defaults, so previous-month selection looked ignored.
+- Fix in [king_games_product_manager/app.js](king_games_product_manager/app.js):
+	- refresh now sends explicit `date_from` and `date_to` along with `period`, computed from combo selection.
+	- this guarantees correct month window even when backend process is stale and still defaults to current month.
+	- summary period label now falls back to selected combo value when backend does not return `period_label`.
+- Updated cache/version: [king_games_product_manager/index.html](king_games_product_manager/index.html) now loads `app.js?v=2.44`; app version bumped to `2.44`.
+- Outcome: selecting "חודש קודם" now queries previous month period consistently on refresh.
+
+# 2026-08-03 - TASKEY offers-vs-leads period selector (current/previous month) (v2.43 / API 1.71)
+
+- Request: בדוח "הצעות מול לידים ב TASKEY" להוסיף קומבו תקופה: חודש נוכחי או חודש קודם, כך שכפתור "רענן נתונים" יריץ לפי התקופה שנבחרה; ברירת מחדל חודש נוכחי.
+- UI update in [king_games_product_manager/index.html](king_games_product_manager/index.html):
+	- added `taskeyOffersLeadsPeriodFilter` with options `חודש נוכחי` (default) and `חודש קודם`.
+- Frontend logic in [king_games_product_manager/app.js](king_games_product_manager/app.js):
+	- added `state.taskeyOffersLeadsPeriod` default `current`.
+	- refresh now calls `/api/sap/taskey-offers-vs-leads?period=current|previous` based on selected combo value.
+	- summary text now shows selected period label from server metadata.
+- Backend logic in [king_games_product_manager/server.py](king_games_product_manager/server.py):
+	- endpoint now supports `period=current|previous`.
+	- `current`: first day of current month through today.
+	- `previous`: first day of previous month through last day of previous month.
+	- response includes `period` and `period_label`.
+- Versions bumped: frontend `2.43`, API `1.71`.
+- Validation: Python compile passed for `server.py`.
+
+# 2026-08-02 - Telegram MG updates now append full request audit to comments_internal
+
+- Request: בכל משימת בוט טלגרם שקשורה ל-MG/עדכון מחיר, להוסיף להערות `comments_internal` תיעוד מלא (append בלבד, ללא דריסה): מי ביצע, קוד משתמש, שעת ביצוע, מה נדרש וכל נתוני הבקשה.
+- Implemented in `king_games_product_manager/telegram_bot_tasks_worker.py`:
+	- added append-only note writer for MG field `comments_internal`
+	- note includes execution timestamp, performer (`username`/`user_id`), user code, task id, request type, required action, and serialized request payload
+	- integrated the comment append into the MG price-change flow before save so the product card stores an audit trail for each handled Telegram task
+- Validation: `py_compile` passed for `telegram_bot_tasks_worker.py`.
+- Outcome: every handled Telegram `PRICE_CHANGE/CHANGE_PRICE` task now documents the full request in MG internal comments without overwriting existing comments.
+
 # 2026-08-02 - Frontend parse error fixed; Processes menu restored (v2.42)
 
 - Request: the app was not showing the Processes screen and sidebar navigation was unresponsive because the frontend script stopped parsing.
